@@ -390,7 +390,7 @@ and use them, along with \eqref{eq:Wa}, to efficiently determine \eqref{eq:amean
 
 Now, these calculations performed, we imagine receiving further data $\data_b$. We perform predictions now as
 \begin{align*}
-\p{y\st}{\data_{a,b}} & = \sum_{i} \sum_{j} \p{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}} \Prob{\vs^{i,j}_{a,b}}{\data_{a}}\,.
+\p{y\st}{\data_{a,b}} & = \sum_{i} \sum_{j} \p{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}} \Prob{\vs^{i,j}_{a,b}}{\data_{a,b}}\,.
 \end{align*}
 The full sums here can easily become too large to actually evaluate. To simplify, we assume that our later observations are independent of the noise in our earlier observations. To be more precise, we approximate as
 \begin{align} \label{eq:approx}
@@ -408,14 +408,14 @@ $
 $.
 
  Moving on, we define
-\begin{align*}
+\begin{align}
 \amean{\vz_b}{\data_a} & \defequal  
-K_{b,a} \tilde{V}_a^{-1} \vz_a
+K_{b,a} \tilde{V}_a^{-1} \vz_a \label{eq;ameanba}
 \\
 \acov{\vz_b}{\data_{a},\vs_b}
 & \defequal V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b} \nonumber\\
-& \hspace{3.5cm} - \amean{\vz_b}{\data_{a,b}}^2 \,.
-\end{align*}
+& \hspace{2.8cm} - \amean{\vz_b}{\data_{a,b}}^2 \,. \label{eq;acovba}
+\end{align}
 where both $\tilde{V}_a$ (or its Cholesky factor) and $\tilde{W}_a^{-1}$ were computed previously. By using \eqref{eq:approx} and again approximating a sum of Gaussians as a single Gaussian,
 \begin{align}
 \Prob{\vs_b}{\data_{a,b}} & = \frac{\sum_i \p{\vz_b}{\data_a,\vs^i_{a,b}}p(\vz_a,\vs^i_{a,b})}{p(\vz_{a,b})}\nonumber\\
@@ -469,7 +469,7 @@ Note that $({V}^{i,j}_{a,b})^{-1}$ is affine in $S^{i,j}_a$, so that where
 \begin{equation}\label{eq:V_a_big}
  V_a \gg K_{a,b} V_b^{-1} K_{b,a}\,,
 \end{equation}
-$({V}^{i,j}_{a,b})^{-1}$ is affine in $(V^i_a)^{-1}$. \eqref{eq:V_a_big} is true if, given $\data_b$, you are unable to accurately predict $\data_a$. This might be the case if $\data_a$ represents a lot of information relative to $\data_b$ (if, for example, $\data_a$ is our entire history of observations where $\data_b$ is simply the most recent observation), or if $\data_b$ and $\data_a$ are simply not particularly well-correlated. On this basis, \eqref{eq:V_a_big} seems reasonable for our application. Defining the affine $f: (V^i_a)^{-1} \mapsto ({V}^{i,j}_{a,b})^{-1}$, then, and as
+$({V}^{i,j}_{a,b})^{-1}$ is effectively affine in $(V^i_a)^{-1}$. \eqref{eq:V_a_big} is true if, given $\data_b$, you are unable to accurately predict $\data_a$. This might be the case if $\data_a$ represents a lot of information relative to $\data_b$ (if, for example, $\data_a$ is our entire history of observations where $\data_b$ is simply the most recent observation), or if $\data_b$ and $\data_a$ are simply not particularly well-correlated. On this basis, \eqref{eq:V_a_big} seems reasonable for our application. Defining the affine $f: (V^i_a)^{-1} \mapsto ({V}^{i,j}_{a,b})^{-1}$, then, and as
 $\sum_i \Prob{\vs^i_{a}}{\data_{a}} = 1$,
 $$
 \sum_i \Prob{\vs^i_{a}}{\data_{a}} f\bigl((V^i_a)^{-1} \bigr) \simeq f\Bigl(\sum_i \Prob{\vs^i_{a}}{\data_{a}}(V^i_a)^{-1} \Bigr)
@@ -502,9 +502,7 @@ which, if $b$ identifies a single observation and $j\in\{0,1\}$, can be computed
 \end{align}
 both of which can be efficiently determined \citep[Appendix B]{osbornebayesian} using the evaluated $\tilde{R}_a$ and $\tilde{T}_a$.
 
-We now turn to $\tilde{W}_{a,b}^{-1}$. Unfortunately, even if \eqref{eq:V_a_big} were true, $\tilde{W}_{a,b}^{-1}$ is quadratic in $(V^i_a)^{-1}$. We will nonetheless assume that $\tilde{W}_{a,b}^{-1}$ is affine in $(V^i_a)^{-1}$. The quality of our approximation for $\tilde{W}_{a,b}^{-1}$ is much less critical than for $\tilde{V}^{-1}_{a,b}$, as the former only influences the variance of our predictions for the current predictant; any flaws in the approximation will not be propagated forward, multiplying in influence. Further, of course, where one probability dominates, $\Prob{\vs^i_{a}}{\data_{a}}\gg \Prob{\vs^{i'}_{a}}{\data_{a}} \forall i' \neq i$,, the approximation is valid. 
-
-With our approximation, we have
+We now turn to $\tilde{W}_{a,b}^{-1}$. Unfortunately, even if \eqref{eq:V_a_big} were true, $\tilde{W}_{a,b}^{-1}$ is quadratic in $(V^i_a)^{-1}$. We will nonetheless assume that $\tilde{W}_{a,b}^{-1}$ is affine in $(V^i_a)^{-1}$. The quality of our approximation for $\tilde{W}_{a,b}^{-1}$ is much less critical than for $\tilde{V}^{-1}_{a,b}$, as the former only influences the variance of our predictions for the current predictant; any flaws in the approximation will not be propagated forward, multiplying in influence. Further, of course, where one probability dominates, $\Prob{\vs^i_{a}}{\data_{a}}\gg \Prob{\vs^{i'}_{a}}{\data_{a}} \forall i' \neq i$,, the approximation is valid. With our approximation,
 \begin{align}
 \tilde{W}^{-1}_{a,b} \defequal
 & \sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}} (\hat{V}_{a,b}^{j})^{-1}\vz_{a,b}^{\phantom{\tr}} \vz_{a,b}^\tr (\hat{V}_{a,b}^{i,j})^{-1}\,.\label{eq:Wab}
@@ -557,37 +555,37 @@ and can solve for $K_{\star,(a,b)}\tilde{W}^{-1}_{a,b}K_{(a,b),\star}$ by effici
 \STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
 \,x\st \leftarrow x_{1+\delta}$
 \\
-\STATE $p(\vz_a) \leftarrow$\eqref{eq:likelihood_a}
+\STATE {\bfseries return:} $p(\vz_a) \leftarrow$\eqref{eq:likelihood_a}
 \FOR {$i = 0,1$}
 \STATE {\bfseries return:} $\Prob{\vs^i_a}{\data_{a}} \leftarrow$ \eqref{eq:psa}\\
 \ENDFOR
- \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $W^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
+ \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $\tilde{W}^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
  \STATE $\amean{y\st}{\data_a} \leftarrow$ \eqref{eq:ameana}, $\acov{y\st}{\data_a} \leftarrow$ \eqref{eq:acova}\\
 \STATE {\bfseries return:} $\p{y\st}{\data_{a}} \leftarrow$ \eqref{eq:pya}\\
 \FOR {$t = 2,\ldots$}
 \STATE $x_b \leftarrow x_t, z_b \leftarrow z_t, x\st \leftarrow x_{t+\delta}$\\
+\STATE $\amean{\vz_b}{\data_a} \leftarrow$ \eqref{eq;ameanba}, $\acov{\vz_b}{\data_a} \leftarrow$ \eqref{eq;acovba}\\
 \STATE $\p{\vz_b}{\data_a} \leftarrow$ \eqref{eq:likelihood_b}\\
 \FOR {$j = 0,1$}
 \STATE {\bfseries return:} $\Prob{\vs^j_b}{\data_{a,b}} \leftarrow$ \eqref{eq:psb}\\
 \ENDFOR
-\STATE $\tilde{R}_{a,b} \leftarrow$ \eqref{eq:Rab}, $\tilde{T}_{a,b}\leftarrow$ \eqref{eq:Tab}, \, $W^{-1}_{a,b} \leftarrow$ \eqref{eq:Wab}\\
+\STATE $\tilde{R}_{a,b} \leftarrow$ \eqref{eq:Rab}, $\tilde{T}_{a,b}\leftarrow$ \eqref{eq:Tab}, \, $\tilde{W}^{-1}_{a,b} \leftarrow$ \eqref{eq:Wab}\\
  \STATE $\amean{y\st}{\data_{a,b}} \leftarrow$ \eqref{eq:ameanab}, $\acov{y\st}{\data_{a,b}} \leftarrow$ \eqref{eq:acovab}\\
 \STATE {\bfseries return:} $\p{y\st}{\data_{a,b}}\leftarrow$ \eqref{eq:pyab}\\
-\STATE $x_a \leftarrow \{x_a,x_b\}, z_a \leftarrow \{z_a,z_b\}$\\
-\STATE $p(\vz_a) \leftarrow p(\vz_a)\p{\vz_b}{\data_a}$
-\STATE $\tilde{R}_a \leftarrow \tilde{R}_{a,b}, \tilde{T}_a\leftarrow \tilde{T}_{a,b}$\\
+\STATE {\bfseries return:} $p(\vz_a) \leftarrow p(\vz_a)\p{\vz_b}{\data_a}$
+\STATE $x_a \leftarrow \{x_a,x_b\},\, z_a \leftarrow \{z_a,z_b\}$\\
+\STATE $\tilde{R}_a \leftarrow \tilde{R}_{a,b},\, \tilde{T}_a\leftarrow \tilde{T}_{a,b}$\\
 \ENDFOR 
 \end{algorithmic}
 \end{algorithm}
 
-An outline of our approach is displayed in Algorithm \ref{alg:fault_bucket}.
-This completely specifies the fault-bucket model for predicting
-signals with arbitrary unspecified faults.  We will demonstrate an
-example in the next section after a brief discussion.
+An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
+% This completely specifies the fault-bucket model for predicting
+% signals with arbitrary unspecified faults.
 
 \subsection{Discussion}
 
-Firstly, we return to the management of our hyperparameters. Unfortunately, analytically marginalising them is infeasible. Most of the hyperparameters of our model can be set by optimising their likelihood on a large training set, such that the likelihood is close to a delta function. This is not true of the variances of our observation models, $\sigma_n$ and $\sigma_f$, due to exactly the same problematic sums discussed earlier. Instead, we marginalise these hyperparameters online using Bayesian Monte Carlo \citep[Chapter 7]{osbornebayesian}, taking a fixed set of samples in their values, and using the hyperparameter likelihoods (computed in \eqref{eq:likelihood_a} and \eqref{eq:likelihood_b}) to construct weights over them. Essentially, Algorithm \ref{alg:fault_bucket} is run in parallel for each sample, and the predictions from each combined in a weighted mixture.
+Firstly, we return to the management of our hyperparameters $\theta$. Unfortunately, analytically marginalising $\theta$ is infeasible. Most of the hyperparameters of our model can be set by optimising their likelihood on a large training set, such that the likelihood is close to a delta function. This is not true of the variances of our observation models, $\sigma_n$ and $\sigma_f$, due to exactly the same problematic sums discussed earlier. Instead, we marginalise these hyperparameters online using Bayesian Monte Carlo \citep[Chapter 7]{osbornebayesian}, taking a fixed set of samples in their values, and using the hyperparameter likelihoods (computed in \eqref{eq:likelihood_a} and \eqref{eq:likelihood_b}) to construct weights over them. Essentially, Algorithm \ref{alg:fault_bucket} is run in parallel for each sample, and the predictions from each combined in a weighted mixture.
 It would be desirable to use non-fixed samples, but, unfortunately, we would need to re-run Algorithm \ref{alg:fault_bucket} from scratch each time a sample is moved. Note that we can use a similar procedure \cite{garnettosborne} to determine the full posterior probability of our hyperparameters $\sigma_n$ and $\sigma_f$.
 
 The proposal in Algorithm \ref{alg:fault_bucket} can be extended in several ways. Firstly, we may wish to sum over a number of possible variances greater than two---useful if observations are prone to faultiness in more than one mode. 
