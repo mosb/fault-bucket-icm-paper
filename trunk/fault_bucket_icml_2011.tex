@@ -80,7 +80,7 @@ potentially rendered less informative than normal due to a faulty
 observation mechanism.  The proposed model uses Gaussian processes
 and a general ``fault bucket'' for \textit{a priori} uncharacterized
 faults, along with an approximate means of marginalising over the potential 
-faultiness of all observations. We demonstrate our method's relevance to several problems drawn from environmental monitoring applications.
+faultiness of all observations. This gives rise to an efficient, flexible algorithm. We demonstrate our method's relevance to several problems drawn from environmental monitoring applications.
 \end{abstract}
 
 \section{Introduction}
@@ -712,7 +712,7 @@ of dams in order to save the lives these fish.
 To illustrate our approach to sensor fault detection, we also tested on a network of weather sensors located on the south coast of England\footnote{The network is maintained by the Bramblemet/Chimet Support Group and funded by organisations including the Royal National Lifeboat Institution, Solent Cruising and Racing Association and Associated British Ports.}. We considered the readings from the Sotonmet sensor, which makes measurements of a number of environmental variables (including wind speed and direction, air temperature, sea temperature, and tide height) and makes up-to-date sensor measurements available through separate web pages (see \url{http://www.sotonmet.co.uk}). We performed on-line prediction over tide height data in which readings from the sensor became stuck at an incorrect value. 
 
 \section{Conclusions}
-We have proposed a novel algorithm, Fault Bucket, for managing time series data corrupted by faults unknown ahead of time. The chief theoretical contribution of the paper is a sequential algorithm for marginalising over the possible faultiness of all observations.
+We have proposed a novel algorithm, Fault Bucket, for managing time series data corrupted by faults unknown ahead of time. The chief theoretical contribution of the paper is a sequential algorithm for marginalising over the possible faultiness of all observations. This allows for fast, principled prediction in the presence of unknown faults.
 
 \bibliography{fault_bucket_icml_2011}
 \bibliographystyle{icml2011}
