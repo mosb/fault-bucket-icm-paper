@@ -85,13 +85,10 @@ faultiness of all observations. This gives rise to an efficient, flexible algori
 
 \section{Introduction}
 We consider the problem of inferring a signal $y\colon \R \to \R$ from
-noisy measurements of it.  Typical algorithms for this purpose model
-observations of the function of interest as being corrupted by
-i.i.d.\space Gaussian noise; however, collected observations in
-real-world applications are often corrupted in less trivial ways due
-to, for example, a faulty sensing mechanism.  Examples of fault types
-encountered in applications are bias, stuck values, and drift from the
-correct signal.
+noisy measurements of it.  Typical algorithms for this purpose often assume that the data is linear, \emph{i.i.d.}, Markovian or Gaussian. In some cases, knowledge about the problem enables the scientist to specify parameterized nonlinear models. This approach is problematic for two reasons. First, the estimation of the parameters is difficult. More crucially, collected observations in real-world applications are often corrupted in non-trivial trivial ways due
+to, for example, a faulty sensing mechanism. This is the case in environmental monitoring, where data gets corrupted in unknown ways, and hence it is not possible to model it with a parametric approach in advance. Our motivating example from comes from this fast growing field:
+water quality monitoring \cite{wagner2006guidelines}. Despite the enormous importance of water quality monitoring to humans, there is a lack of sound statistical machine learning solutions for this problem. With this study we hope to release some of this data to the public domain (following the reviewing process in order to satisfy anonymous reviewing) and to present new machine learning techniques to meet the demands in this field.
+
 
 Figure \ref{hgriver} shows an example of a data stream that is
 corrupted by a non-trivial sensor fault.  The observations represent
@@ -112,7 +109,7 @@ error.
 % \end{figure*}
 
 Our proposed method for predicting signals with faulty observation
-mechanisms of this and other types will rely on Gaussian processes to
+mechanisms of this and other types will rely on Gaussian processes (GPs) to
 perform inference about the underlying latent function.  Previous work
 has approached this problem by creating observation models that
 specify the anticipated potential fault types \textit{a priori}
@@ -120,10 +117,11 @@ specify the anticipated potential fault types \textit{a priori}
 in highly variable or poorly understood environments.  Here we suggest
 the use of a catch-all ``fault bucket,'' which can identify and treat appropriately
 data readings suspected of being corrupted in some way.  The
-result is a method for data-stream prediction that can manage wide range of faulty observations without
-requiring significant domain-specific knowledge.
+result is a method for data-stream prediction that can manage wide range of faulty observations without requiring significant domain-specific knowledge.
 
-The collection of literature on similar topics is vast, under labels such as fault detection \cite{deFreitas1996, Isermann2005, Ding2008}, novelty detection \cite{Markou2003}, anomaly detection \cite{Chandola:2009}, or one-class classification \cite{Khan2010}. In comparison to most previous proposals, we use Gaussian processes to provide probabilistic, non-linear models of the latent and fault processes. As a consequence, in addition to being able to provide posterior probabilities of observation faultiness, we are  able to perform effective prediction for the latent process even in the presence of faults.
+The collection of literature on similar topics is vast, under labels such as fault detection \cite{deFreitas1996, Eciolaza2001, Isermann2005, Ding2008}, novelty detection \cite{Markou2003}, anomaly detection \cite{Chandola:2009}, or one-class classification \cite{Khan2010}. Despite this, most of the techniques are too simple (e.g. linear or Gaussian) or fail to produce good uncertainty estimates. (It should also be pointed out that many other problems in anomaly detection and one-class classification are of a very different nature and, hence, the techniques developed there are not immediately applicable to our domain of interest.) These uncertainty estimates are key in order to provide the user with reliable monitoring signals. Green-Tech areas, including environmental monitoring and energy demand prediction, are still far from full automation. At present, what is important is to provide the user with signals that she can use to reach a decision. Uncertainty estimates are therefore of utmost importance. For this reason, we focus on developing GP-based techniques to build probabilistic non-linear models of the latent and fault processes and, hence, deliver reliable reports.  In addition to being able to provide posterior probabilities of observation faultiness, we are  able to perform effective prediction for the latent process even in the presence of faults.
+
+GPs have been used previously for fault detection \cite{Eciolaza2001}. However, the nature of the data and setup in that domain is different from ours. This has forced us to innovate new GP-based techniques for detection and prediction in the presence of faults.
 
 \section{Gaussian Processes}
 Gaussian processes provide a simple, flexible framework for
@@ -610,8 +608,10 @@ $\sigma_n^2$ for $\sigma_f^2$.
 
 \begin{figure*}
   \centering
-  \psff{bias}
-  \psff{dynamics}
+  \psff{painting}
+  \psff{painting}
+  \psff{painting}
+  \psff{painting}
   \psff{painting}
   \label{test}
 \end{figure*}
