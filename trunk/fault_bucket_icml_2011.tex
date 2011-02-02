@@ -45,15 +45,15 @@
 \newcommand{\vx}{\vect{x}}
 \newcommand{\vf}{\vect{f}}
 \newcommand{\vs}{\vect{\sigma}}
-\newcommand{\amean}[2]{\tilde{{m}}\bigl(#1\big\vert#2\bigr)}
-\newcommand{\acov}[2]{\tilde{{C}}\bigl(#1\big\vert#2\bigr)}
-\newcommand{\p}[2]{p\bigl(#1\big\vert#2\bigr)}
+\newcommand{\amean}[2]{\tilde{{m}}(#1 \given #2 )}
+\newcommand{\acov}[2]{\tilde{{C}}(#1 \given #2 )}
+\newcommand{\p}[2]{p(#1 \given #2 )}
 \newcommand{\fPr}{p}
-\newcommand{\Prob}[2]{\fPr\bigl(#1\big\vert#2\bigr)}
+\newcommand{\Prob}[2]{\fPr(#1 \given #2 )}
 \newcommand{\ps}[2]{p(#1\vert#2)}
-\newcommand{\mean}[2]{{m}\bigl(#1\big\vert#2\bigr)}
-\newcommand{\cov}[2]{{C}\bigl(#1\big\vert#2\bigr)}
-\newcommand{\N}[3]{\cm{N}\bigl(#1;#2,#3\bigr)}
+\newcommand{\mean}[2]{{m}(#1 \given #2 )}
+\newcommand{\cov}[2]{{C}(#1 \given #2 )}
+\newcommand{\N}[3]{\cm{N}( #1;#2,#3 )}
 \newcommand{\st}{_{\star}}
 \newcommand{\tr}{\ensuremath{\mathsf{T}}}
 \newcommand{\defequal}{\triangleq}
@@ -83,65 +83,50 @@
   We provide a proposal for performing both online prediction and
   retrospective inference of signals from observations that are
   potentially rendered less informative than normal due to a faulty
-  observation mechanism.  The proposed model uses Gaussian processes and
-  a general ``fault bucket'' for \textit{a priori} uncharacterized
-  faults, along with an approximate means of marginalising over the
+  observation mechanism.  The proposed model uses Gaussian processes
+  and a general ``fault bucket'' for \textit{a priori} uncharacterized
+  faults, along with an approximate method for marginalizing the
   potential faultiness of all observations. This gives rise to an
   efficient, flexible algorithm. We demonstrate our method's relevance
-  to several problems drawn from environmental monitoring applications.
+  to several problems drawn from environmental-monitoring
+  applications.
 \end{abstract}
 
 \section{Introduction}
+
 We consider the problem of inferring a signal $y\colon \R \to \R$ from
 noisy measurements of it.  Typical algorithms for this purpose often
-assume that the data is linear, \emph{i.i.d.}, Markovian or
-Gaussian. In some cases, knowledge about the problem enables the
-scientist to specify parameterized nonlinear models. This approach is
-problematic for two reasons. First, the estimation of the parameters
-is difficult. More crucially, collected observations in real-world
-applications are often corrupted in non-trivial trivial ways due to,
-for example, a faulty sensing mechanism. This is the case in
-environmental monitoring, where data gets corrupted in unknown ways,
-and hence it is not possible to model it with a parametric approach in
-advance. Our motivating example from comes from this fast growing
-field: water quality monitoring \citep{wagner2006guidelines}. Despite
-the enormous importance of water quality monitoring to humans, there
-is a lack of sound statistical machine learning solutions for this
-problem. With this study we hope to release some of this data to the
-public domain (following the reviewing process in order to satisfy
-anonymous reviewing) and to present new machine learning techniques to
-meet the demands in this field.
-
-%% Figure \ref{hgriver} shows an example of a data stream that is
-%% corrupted by a non-trivial sensor fault.  The observations represent
-%% readings of the water level of a river.  The true signal is corrupted
-%% by a sparse correlated faulty noise process, exhibiting an anomalous
-%% phenomenon called ``painting.''  These faulty readings are caused by
-%% periodic openings of a dam downstream from the water-level sensor,
-%% which can result in drastic non-i.i.d., non-Gaussian measurement
-%% error.
-
-% \begin{figure*}
-%  \begin{centering}
-%  \psff{hgriver}
-%  \caption{Measurements of river water level with ``painting''
-%    observation fault.}
-%  \end{centering}
-%  \label{hgriver}
-% \end{figure*}
+assume that the data is linear, i.i.d., Markovian, or Gaussian. In
+some cases, knowledge about the problem can enable the explicit
+specification of parameterized nonlinear models. This approach,
+however, is problematic for two reasons. First, estimating the model
+parameters is often difficult. More crucially, collected observations
+in real-world applications are often corrupted in non-trivial ways due
+to, for example, a faulty sensing mechanism. Such effects often
+inhibit effective environmental monitoring, where data can be
+corrupted in unknown ways, rendering the \emph{a priori} construction
+of parametric model impossible. The motivating example for this paper
+is the related fast-growing field of water-quality monitoring
+\citep{wagner2006guidelines}. Despite the enormous importance of
+water-quality monitoring to humans, there is a lack of sound
+statistical machine-learning solutions for this problem. With this
+study, we hope to release some of this data to the public domain
+(following the reviewing process in order to satisfy anonymous
+reviewing) and to present new machine-learning techniques to meet the
+demands of field.
 
 Our proposed method for predicting signals with faulty observation
-mechanisms of this and other types will rely on Gaussian processes
-(\acro{gp}s) to perform inference about the underlying latent
-function.  Previous work has approached this problem by creating
-observation models that specify the anticipated potential fault types
-\textit{a priori} \citep{garnettosborne}, but this might be an
-unreasonable assumption in highly variable or poorly understood
-environments.  Here we suggest the use of a catch-all ``fault
-bucket,'' which can identify and treat appropriately data readings
-suspected of being corrupted in some way.  The result is a method for
-data-stream prediction that can manage wide range of faulty
-observations without requiring significant domain-specific knowledge.
+mechanisms will rely on Gaussian processes (\acro{gp}s) to perform
+inference about the underlying latent function.  Previous work has
+approached this problem by creating observation models that specify
+the anticipated potential fault types \textit{a priori}
+\citep{garnettosborne}, but this might be an unreasonable assumption
+in highly variable or poorly understood environments.  Here we suggest
+the use of a catch-all ``fault bucket,'' which can identify and treat
+appropriately data readings suspected of being corrupted in some way.
+The result is a method for data-stream prediction that can manage a
+wide range of faulty observations without requiring significant
+domain-specific knowledge.
 
 The collection of literature on similar topics is vast, under labels
 such as fault detection \citep{deFreitas1996, Eciolaza2001,
@@ -149,32 +134,34 @@ such as fault detection \citep{deFreitas1996, Eciolaza2001,
 anomaly detection \citep{Chandola:2009}, or one-class classification
 \citep{Khan2010}. Despite this, most of the techniques are too simple
 (e.g. linear or Gaussian) or fail to produce good uncertainty
-estimates. (It should also be pointed out that many other problems in
-anomaly detection and one-class classification are of a very different
-nature and, hence, the techniques developed there are not immediately
-applicable to our domain of interest.) These uncertainty estimates are
-key in order to provide the user with reliable monitoring
-signals. Green-Tech areas, including environmental monitoring and
-energy demand prediction, are still far from full automation. At
-present, what is important is to provide the user with signals that
-she can use to reach a decision. Uncertainty estimates are therefore
-of utmost importance. For this reason, we focus on developing
-\acro{gp}-based techniques to build probabilistic non-linear models of
-the latent and fault processes and, hence, deliver reliable reports.
-In addition to being able to provide posterior probabilities of
-observation faultiness, we are able to perform effective prediction
-for the latent process even in the presence of faults.
+estimates. Additionally, many problems in anomaly detection and
+one-class classification are of a very different nature and,
+therefore, the techniques developed there are not immediately
+applicable to our domain of interest. Uncertainty estimates are key in
+order to provide the user of a system with reliable monitoring
+signals. Green-tech areas, including environmental monitoring and
+energy-demand prediction, are still far from full
+automation. Currently, the most important requirement of such systems
+is to provide the user with signals that he or she can use to reach a
+decision, making the uncertainty of predictions of the utmost
+importance. For this reason, we focus on developing \acro{gp}-based
+techniques to build probabilistic nonlinear models of the latent and
+fault processes and thereby deliver reliable reports.  In addition to
+providing posterior probabilities of observation faultiness, we are
+able to perform effective prediction for the latent process even in
+the presence of faults.
 
 GPs have been used previously for fault detection
 \citep{Eciolaza2001}. However, the nature of the data and setup in
-that domain is different from ours. This has forced us to innovate new
+that domain is different from ours, forcing us to develop new
 \acro{gp}-based techniques for detection and prediction in the
 presence of faults.
 
 \section{Gaussian Processes}
+
 Gaussian processes provide a simple, flexible framework for performing
-Bayesian inference about functions \citep{gpml}.  A Gaussian process is
-a distribution on the functions $y\colon \cm{X} \to \R$ (on an
+Bayesian inference about functions \citep{gpml}.  A Gaussian process
+is a distribution on the functions $y\colon \cm{X} \to \R$ (on an
 arbitrary domain $\cm{X}$) with the property that the distribution of
 the function values at a finite subset of points $F \subseteq \cm{X}$
 are multivariate Gaussian distributed.
@@ -204,15 +191,15 @@ the prior distribution on $\bm{y} \deq y(\bm{x})$ is
  \bigr),
 \end{equation*}
 where $K(\bm{x}, \bm{x}; \theta)$ is the Gram matrix of the points
-$\bm{x}$. $\theta$ is a vector containing any parameters required of $\mu$
-and $K$, which constitute hyperparameters of the model. 
+$\bm{x}$, and $\theta$ is a vector containing any parameters required
+of $\mu$ and $K$, which constitute hyperparameters of the model.
 
 Exact measurements of the latent function are typically not available;
 however, we may combine the Gaussian process distribution on the
 latent function with an observation model that takes into account
 potential noise in our measurements.  Let $z(x)$ represent the
 realization of an observation of the signal at $x$ and $y(x)$
-represents the value of the unknown true latent signal at that point.
+represent the value of the unknown true latent signal at that point.
 When the observation mechanism is not expected to experience faults,
 the usual noise model used is
 \begin{equation}\label{iidnoise}
@@ -220,7 +207,7 @@ the usual noise model used is
  \deq
  \cm{N}(z; y, \sigma_n^2),
 \end{equation}
-represents additive i.i.d.\space Gaussian observation noise with
+which represents additive i.i.d.\space Gaussian observation noise with
 variance $\sigma_n^2$. Note that this model is inappropriate when
 sensors can experience faults, which complicate the relationship
 between $z$ and $y$.
@@ -229,13 +216,13 @@ With the observation model above, given a set of observations
 $
  \data
  \deq
- \Bigl\lbrace
+ \bigl\lbrace
    \bigl( x, z(x) \bigr)
- \Bigr\rbrace
+ \bigr\rbrace
  \deq
  ( \bm{x}, \bm{z} )
 $,
-the posterior distribution of $y\st$ given these data is
+the posterior distribution of $y\st \deq y(x\st)$ given these data is
 \begin{equation*}
  p(y\st \given \data, \theta)
  =
@@ -617,39 +604,39 @@ and can solve for $K_{\star,(a,b)}\tilde{W}^{-1}_{a,b}K_{(a,b),\star}$ by effici
 %%  \label{faultpredictions}
 %% \end{figure*}
 
-\begin{algorithm}[tb]
-   \caption{Fault Bucket}
-\label{alg:fault_bucket}
-\begin{algorithmic}
-   \STATE {\bfseries input:} data $(\vx,\vz)$, lookahead $\delta$
-\STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
-\,x\st \leftarrow x_{1+\delta}$
-\\
-\STATE {\bfseries return:} $p(\vz_a) \leftarrow$\eqref{eq:likelihood_a}
-\FOR {$i = 0,1$}
-\STATE {\bfseries return:} $\Prob{\vs^i_a}{\data_{a}} \leftarrow$ \eqref{eq:psa}\\
-\ENDFOR
- \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $\tilde{W}^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
- \STATE $\amean{y\st}{\data_a} \leftarrow$ \eqref{eq:ameana}, $\acov{y\st}{\data_a} \leftarrow$ \eqref{eq:acova}\\
-\STATE {\bfseries return:} $\p{y\st}{\data_{a}} \leftarrow$ \eqref{eq:pya}\\
-\FOR {$t = 2,\ldots$}
-\STATE $x_b \leftarrow x_t, z_b \leftarrow z_t, x\st \leftarrow x_{t+\delta}$\\
-\STATE $\amean{\vz_b}{\data_a} \leftarrow$ \eqref{eq;ameanba}, $\acov{\vz_b}{\data_a} \leftarrow$ \eqref{eq;acovba}\\
-\STATE $\p{\vz_b}{\data_a} \leftarrow$ \eqref{eq:likelihood_b}\\
-\FOR {$j = 0,1$}
-\STATE {\bfseries return:} $\Prob{\vs^j_b}{\data_{a,b}} \leftarrow$ \eqref{eq:psb}\\
-\ENDFOR
-\STATE $\tilde{R}_{a,b} \leftarrow$ \eqref{eq:Rab}, $\tilde{T}_{a,b}\leftarrow$ \eqref{eq:Tab}, \, $\tilde{W}^{-1}_{a,b} \leftarrow$ \eqref{eq:Wab}\\
- \STATE $\amean{y\st}{\data_{a,b}} \leftarrow$ \eqref{eq:ameanab}, $\acov{y\st}{\data_{a,b}} \leftarrow$ \eqref{eq:acovab}\\
-\STATE {\bfseries return:} $\p{y\st}{\data_{a,b}}\leftarrow$ \eqref{eq:pyab}\\
-\STATE {\bfseries return:} $p(\vz_a) \leftarrow p(\vz_a)\p{\vz_b}{\data_a}$
-\STATE $x_a \leftarrow \{x_a,x_b\},\, z_a \leftarrow \{z_a,z_b\}$\\
-\STATE $\tilde{R}_a \leftarrow \tilde{R}_{a,b},\, \tilde{T}_a\leftarrow \tilde{T}_{a,b}$\\
-\ENDFOR 
-\end{algorithmic}
-\end{algorithm}
+%% \begin{algorithm}[tb]
+%%    \caption{Fault Bucket}
+%% \label{alg:fault_bucket}
+%% \begin{algorithmic}
+%%    \STATE {\bfseries input:} data $(\vx,\vz)$, lookahead $\delta$
+%% \STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
+%% \,x\st \leftarrow x_{1+\delta}$
+%% \\
+%% \STATE {\bfseries return:} $p(\vz_a) \leftarrow$\eqref{eq:likelihood_a}
+%% \FOR {$i = 0,1$}
+%% \STATE {\bfseries return:} $\Prob{\vs^i_a}{\data_{a}} \leftarrow$ \eqref{eq:psa}\\
+%% \ENDFOR
+%%  \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $\tilde{W}^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
+%%  \STATE $\amean{y\st}{\data_a} \leftarrow$ \eqref{eq:ameana}, $\acov{y\st}{\data_a} \leftarrow$ \eqref{eq:acova}\\
+%% \STATE {\bfseries return:} $\p{y\st}{\data_{a}} \leftarrow$ \eqref{eq:pya}\\
+%% \FOR {$t = 2,\ldots$}
+%% \STATE $x_b \leftarrow x_t, z_b \leftarrow z_t, x\st \leftarrow x_{t+\delta}$\\
+%% \STATE $\amean{\vz_b}{\data_a} \leftarrow$ \eqref{eq;ameanba}, $\acov{\vz_b}{\data_a} \leftarrow$ \eqref{eq;acovba}\\
+%% \STATE $\p{\vz_b}{\data_a} \leftarrow$ \eqref{eq:likelihood_b}\\
+%% \FOR {$j = 0,1$}
+%% \STATE {\bfseries return:} $\Prob{\vs^j_b}{\data_{a,b}} \leftarrow$ \eqref{eq:psb}\\
+%% \ENDFOR
+%% \STATE $\tilde{R}_{a,b} \leftarrow$ \eqref{eq:Rab}, $\tilde{T}_{a,b}\leftarrow$ \eqref{eq:Tab}, \, $\tilde{W}^{-1}_{a,b} \leftarrow$ \eqref{eq:Wab}\\
+%%  \STATE $\amean{y\st}{\data_{a,b}} \leftarrow$ \eqref{eq:ameanab}, $\acov{y\st}{\data_{a,b}} \leftarrow$ \eqref{eq:acovab}\\
+%% \STATE {\bfseries return:} $\p{y\st}{\data_{a,b}}\leftarrow$ \eqref{eq:pyab}\\
+%% \STATE {\bfseries return:} $p(\vz_a) \leftarrow p(\vz_a)\p{\vz_b}{\data_a}$
+%% \STATE $x_a \leftarrow \{x_a,x_b\},\, z_a \leftarrow \{z_a,z_b\}$\\
+%% \STATE $\tilde{R}_a \leftarrow \tilde{R}_{a,b},\, \tilde{T}_a\leftarrow \tilde{T}_{a,b}$\\
+%% \ENDFOR 
+%% \end{algorithmic}
+%% \end{algorithm}
 
-An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
+%% An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
 
 \subsection{Discussion}
 
@@ -708,7 +695,14 @@ $\sigma_n^2$ for $\sigma_f^2$.
 \begin{figure*}
   \centering
   \psff{bias}
+  \psff{kf_bias}
   \psff{dynamics}
+  \psff{kf_dynamics}
+  \label{test}
+\end{figure*}
+
+\begin{figure*}
+  \centering
   \psff{painting}
   \psff{fishkiller}
   \label{test}
@@ -788,41 +782,26 @@ to proper regulation of dams in order to save the lives these fish.
   \centering
   \caption{Quantitative comparison of different algorithms on the
     synthetic datasets.  For each dataset, the mean squared error
-    (\textsc{mse}), the log likelihood of the true data ($\log
-    p(\data \given \cm{M})$), and the true-positive and false-positive
-    rates of detection for faulty points (\textsc{tpr} and
-    \textsc{fpr}), respectively, are shown.  The top half of the
-    table refers to the bias dataset; the bottom half to the
-    change-in-dynamics dataset.}
+    (\textsc{mse}), the log likelihood of the true data ($\log p(\bm{y}
+    \given \bm{x}, \cm{M})$), and the true-positive and false-positive rates
+    of detection for faulty points (\textsc{tpr} and \textsc{fpr}),
+    respectively, are shown.  The top half of the table refers to the
+    bias dataset; the bottom half to the change-in-dynamics
+    dataset. The better of each pair of results is highlighted in
+    bold.}
   \label{tbl:results}
   \begin{tabular}{ccccc}
     \toprule
-    Method & \scshape{mse} & $\log p(\data \given \cm{M})$ & \scshape{tpr} & \scshape{fpr} \\
+    Method & \scshape{mse} & $\log p(\bm{y} \given \bm{x}, \cm{M})$ & \scshape{tpr} & \scshape{fpr} \\
     \cmidrule{1-1} \cmidrule(l){2-5} 
-    \scshape{kf} & 0 & 0 & 0 & 0 \\
-    \scshape{fb} & 0.034 & -360 & 0.997 & 0.011 \\
+    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 \\
+    \scshape{fb} & \textbf{0.034} & \textbf{-360} & \textbf{0.997} & \textbf{0.011} \\
     \midrule
-    \scshape{kf} & 0 & 0 & 0 & 0 \\
-    \scshape{fb} & 0.075 & $-1.30 \times 10^4$ & 0.7988 & 0.006 \\
+    \scshape{kf} & 0.360 & $-3.54 \times 10^4$ & \textbf{0.835} & 0.046 \\
+    \scshape{fb} & \textbf{0.075} & $\mathbf{-1.30 \times 10^4}$ & 0.798 & \textbf{0.006} \\
     \bottomrule
   \end{tabular}
 \end{table}
-
-
-%% \subsection{Stuck Sensor}
-%% To illustrate our approach to sensor fault detection, we also tested
-%% on a network of weather sensors located on the south coast of
-%% England\footnote{The network is maintained by the Bramblemet/Chimet
-%%   Support Group and funded by organisations including the Royal
-%%   National Lifeboat Institution, Solent Cruising and Racing
-%%   Association and Associated British Ports.}. We considered the
-%% readings from the Sotonmet sensor, which makes measurements of a
-%% number of environmental variables (including wind speed and direction,
-%% air temperature, sea temperature, and tide height) and makes
-%% up-to-date sensor measurements available through separate web pages
-%% (see \url{http://www.sotonmet.co.uk}). We performed on-line prediction
-%% over tide height data in which readings from the sensor became stuck
-%% at an incorrect value.
 
 \section{Conclusions}
 We have proposed a novel algorithm, Fault Bucket, for managing time
