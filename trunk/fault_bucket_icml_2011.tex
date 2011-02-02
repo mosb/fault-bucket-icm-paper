@@ -463,7 +463,7 @@ K_{b,a} \tilde{V}_a^{-1} \vz_a \label{eq;ameanba}
 \acov{\vz_b}{\data_{a},\vs_b}
 \defequal {} & V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b} - {} \nonumber\\
 & - \amean{\vz_b}{\data_{a,b}}^2, \label{eq;acovba}
-\end{align}
+\end{align*}
 where both $\tilde{V}_a$ (or its Cholesky factor) and
 $\tilde{W}_a^{-1}$ were computed previously. By using
 \eqref{eq:approx} and again approximating a sum of Gaussians as a
@@ -682,17 +682,32 @@ $\sigma_n^2$ for $\sigma_f^2$.
 
 \begin{figure*}
   \centering
+  \small
   \psff{bias}
   \psff{kf_bias}
+  \vspace*{2\baselineskip}
   \psff{dynamics}
   \psff{kf_dynamics}
+  \caption{Mean and $\pm3\sigma$ standard-devation bounds for the
+    predictions of (first and third) the fault-bucket algorithm and
+    (second and fourth) the Kalman filter algorithm on (top two) the
+    synthetic bias dataset and (bottom two), the synthetic anomaly
+    dataset.  Detected faults are marked in black crosses, and the
+    unobserved true values are marked in grey circles.}
   \label{compare}
 \end{figure*}
 
 \begin{figure*}
   \centering
-  \psff{painting}
+  \small
+  \psff{painting} \\
+  \vspace{\baselineskip}
   \psff{fishkiller}
+  \caption{Mean and $\pm3\sigma$ standard-devation bounds for the
+    predictions of the fault-bucket algorithm on (top), the painting
+    dataset and (bottom), the ``fishkiller'' dataset.  Detected faults are
+    marked in black crosses, and the unobserved true values are marked
+    in grey circles.}
   \label{justfb}
 \end{figure*}
 
