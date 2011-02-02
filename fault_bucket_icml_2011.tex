@@ -679,7 +679,9 @@ over time.
 In some contexts it might be useful to perform inference about the
 fault contribution, rather than the signal of interest.  This task is
 trivial; we merely switch the roles of the fault and non-fault
-contributions. Note that, using our full posteriors for faultiness, we can also trivially use Bayesian decision theory to make a hard decisions as required.
+contributions. Note that, using our full posteriors for faultiness, we
+can also trivially use Bayesian decision theory to make hard decisions
+as required.
 % To make a prediction about a potential faulty signal
 % at $x$, we follow exactly the same procedure as above, substituting
 % $\sigma_n^2$ for $\sigma_f^2$.
@@ -704,9 +706,8 @@ contributions. Note that, using our full posteriors for faultiness, we can also 
 \begin{figure*}
   \centering
   \small
-\hspace{-2.8cm}\psff{painting} \\
-%  \vspace{\baselineskip}
-\hspace{-2.8cm}\psff{fishkiller}
+  \psff{painting} \\
+  \psff{fishkiller}
   \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
     predictions of the fault-bucket algorithm on (top), the painting
     dataset and (bottom), the ``fishkiller'' dataset.  Detected faults are
@@ -784,7 +785,8 @@ open and close the floodgates too quickly. When this happens, the
 water level on the other side of the dam experiences a rapid drop
 during which time salmon can become trapped on the shores and
 stranded, leading to suffocation. Detecting these events is critical
-to proper regulation of dams in order to preserve the lives of these fish.
+to proper regulation of dams in order to preserve the lives of these
+fish.
 
 %\subsection{Implementation}
 
@@ -862,13 +864,13 @@ dataset somewhat slower than the Kalman filter.
   \end{tabular}
 \end{table}
 
-\section{Conclusions}
-We have proposed a novel algorithm which we called the ``fault
-bucket,'' for managing time-series data corrupted by faults unknown
-ahead of time. The chief theoretical contribution of the paper is a
-sequential algorithm for marginalizing over the possible faultiness of
-all observations. This allows for fast, principled prediction in the
-presence of unknown faults.
+\section{Conclusion}
+We have proposed a novel algorithm, the ``fault bucket,'' for managing
+time-series data corrupted by faults unknown ahead of time. Our chief
+contribution is a sequential algorithm for marginalizing the
+faultiness of observations in a \acro{gp} framework, allowing for
+fast, effective prediction in the presence of unknwon faults and the
+simultaneous detection of faulty observations.
 
 \bibliography{fault_bucket_icml_2011}
 \bibliographystyle{icml2011}
