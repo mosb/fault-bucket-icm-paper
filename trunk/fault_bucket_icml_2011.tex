@@ -5,7 +5,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 
-\usepackage{hyperref}
+\usepackage[draft]{hyperref}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 % Employ this version of the ``usepackage'' statement after the paper has
@@ -24,6 +24,7 @@
 \usepackage{amssymb}
 %\usepackage[T1]{fontenc}
 \usepackage{nicefrac}
+\usepackage{booktabs}
 
 \usepackage{natbib}
 
@@ -35,6 +36,7 @@
 \newcommand{\bm}[1]{\ensuremath{\mathbf{#1}}}
 \newcommand{\data}{\ensuremath{\cm{D}}}
 \newcommand{\inv}{\ensuremath{^{-1}}}
+\newcommand{\acro}[1]{\textsc{#1}}
 
 % Mike's definitions
 \newcommand{\dd}[2]{\delta(#1-#2))}
@@ -66,38 +68,58 @@
 
 \begin{document}
 
-\twocolumn[
-\icmltitle{Fault Bucket for Time-Series Prediction with Uncharacterized
-Faulty Observations}
-\icmlkeywords{Gaussian processes, time-series prediction, fault detection, hyperparameter marginalization}
+\twocolumn[ 
+
+  \icmltitle{A ``Fault Bucket'' for Time-Series Prediction with
+    Uncharacterized Faulty Observations}
+
+  \icmlkeywords{Gaussian processes, time-series prediction, fault
+    detection, hyperparameter marginalization}
+
 \vskip 0.3in
 ]
 
 \begin{abstract}
-We provide a proposal for performing both online prediction and
-retrospective inference of signals from observations that are
-potentially rendered less informative than normal due to a faulty
-observation mechanism.  The proposed model uses Gaussian processes
-and a general ``fault bucket'' for \textit{a priori} uncharacterized
-faults, along with an approximate means of marginalising over the potential 
-faultiness of all observations. This gives rise to an efficient, flexible algorithm. We demonstrate our method's relevance to several problems drawn from environmental monitoring applications.
+  We provide a proposal for performing both online prediction and
+  retrospective inference of signals from observations that are
+  potentially rendered less informative than normal due to a faulty
+  observation mechanism.  The proposed model uses Gaussian processes and
+  a general ``fault bucket'' for \textit{a priori} uncharacterized
+  faults, along with an approximate means of marginalising over the
+  potential faultiness of all observations. This gives rise to an
+  efficient, flexible algorithm. We demonstrate our method's relevance
+  to several problems drawn from environmental monitoring applications.
 \end{abstract}
 
 \section{Introduction}
 We consider the problem of inferring a signal $y\colon \R \to \R$ from
-noisy measurements of it.  Typical algorithms for this purpose often assume that the data is linear, \emph{i.i.d.}, Markovian or Gaussian. In some cases, knowledge about the problem enables the scientist to specify parameterized nonlinear models. This approach is problematic for two reasons. First, the estimation of the parameters is difficult. More crucially, collected observations in real-world applications are often corrupted in non-trivial trivial ways due
-to, for example, a faulty sensing mechanism. This is the case in environmental monitoring, where data gets corrupted in unknown ways, and hence it is not possible to model it with a parametric approach in advance. Our motivating example from comes from this fast growing field:
-water quality monitoring \cite{wagner2006guidelines}. Despite the enormous importance of water quality monitoring to humans, there is a lack of sound statistical machine learning solutions for this problem. With this study we hope to release some of this data to the public domain (following the reviewing process in order to satisfy anonymous reviewing) and to present new machine learning techniques to meet the demands in this field.
+noisy measurements of it.  Typical algorithms for this purpose often
+assume that the data is linear, \emph{i.i.d.}, Markovian or
+Gaussian. In some cases, knowledge about the problem enables the
+scientist to specify parameterized nonlinear models. This approach is
+problematic for two reasons. First, the estimation of the parameters
+is difficult. More crucially, collected observations in real-world
+applications are often corrupted in non-trivial trivial ways due to,
+for example, a faulty sensing mechanism. This is the case in
+environmental monitoring, where data gets corrupted in unknown ways,
+and hence it is not possible to model it with a parametric approach in
+advance. Our motivating example from comes from this fast growing
+field: water quality monitoring \citep{wagner2006guidelines}. Despite
+the enormous importance of water quality monitoring to humans, there
+is a lack of sound statistical machine learning solutions for this
+problem. With this study we hope to release some of this data to the
+public domain (following the reviewing process in order to satisfy
+anonymous reviewing) and to present new machine learning techniques to
+meet the demands in this field.
 
-
-Figure \ref{hgriver} shows an example of a data stream that is
-corrupted by a non-trivial sensor fault.  The observations represent
-readings of the water level of a river.  The true signal is corrupted
-by a sparse correlated faulty noise process, exhibiting an anomalous
-phenomenon called ``painting.''  These faulty readings are caused by
-periodic openings of a dam downstream from the water-level sensor,
-which can result in drastic non-i.i.d., non-Gaussian measurement
-error.
+%% Figure \ref{hgriver} shows an example of a data stream that is
+%% corrupted by a non-trivial sensor fault.  The observations represent
+%% readings of the water level of a river.  The true signal is corrupted
+%% by a sparse correlated faulty noise process, exhibiting an anomalous
+%% phenomenon called ``painting.''  These faulty readings are caused by
+%% periodic openings of a dam downstream from the water-level sensor,
+%% which can result in drastic non-i.i.d., non-Gaussian measurement
+%% error.
 
 % \begin{figure*}
 %  \begin{centering}
@@ -109,28 +131,53 @@ error.
 % \end{figure*}
 
 Our proposed method for predicting signals with faulty observation
-mechanisms of this and other types will rely on Gaussian processes (GPs) to
-perform inference about the underlying latent function.  Previous work
-has approached this problem by creating observation models that
-specify the anticipated potential fault types \textit{a priori}
-\cite{garnettosborne}, but this might be an unreasonable assumption
-in highly variable or poorly understood environments.  Here we suggest
-the use of a catch-all ``fault bucket,'' which can identify and treat appropriately
-data readings suspected of being corrupted in some way.  The
-result is a method for data-stream prediction that can manage wide range of faulty observations without requiring significant domain-specific knowledge.
+mechanisms of this and other types will rely on Gaussian processes
+(\acro{gp}s) to perform inference about the underlying latent
+function.  Previous work has approached this problem by creating
+observation models that specify the anticipated potential fault types
+\textit{a priori} \citep{garnettosborne}, but this might be an
+unreasonable assumption in highly variable or poorly understood
+environments.  Here we suggest the use of a catch-all ``fault
+bucket,'' which can identify and treat appropriately data readings
+suspected of being corrupted in some way.  The result is a method for
+data-stream prediction that can manage wide range of faulty
+observations without requiring significant domain-specific knowledge.
 
-The collection of literature on similar topics is vast, under labels such as fault detection \cite{deFreitas1996, Eciolaza2001, Isermann2005, Ding2008}, novelty detection \cite{Markou2003}, anomaly detection \cite{Chandola:2009}, or one-class classification \cite{Khan2010}. Despite this, most of the techniques are too simple (e.g. linear or Gaussian) or fail to produce good uncertainty estimates. (It should also be pointed out that many other problems in anomaly detection and one-class classification are of a very different nature and, hence, the techniques developed there are not immediately applicable to our domain of interest.) These uncertainty estimates are key in order to provide the user with reliable monitoring signals. Green-Tech areas, including environmental monitoring and energy demand prediction, are still far from full automation. At present, what is important is to provide the user with signals that she can use to reach a decision. Uncertainty estimates are therefore of utmost importance. For this reason, we focus on developing GP-based techniques to build probabilistic non-linear models of the latent and fault processes and, hence, deliver reliable reports.  In addition to being able to provide posterior probabilities of observation faultiness, we are  able to perform effective prediction for the latent process even in the presence of faults.
+The collection of literature on similar topics is vast, under labels
+such as fault detection \citep{deFreitas1996, Eciolaza2001,
+  Isermann2005, Ding2008}, novelty detection \citep{Markou2003},
+anomaly detection \citep{Chandola:2009}, or one-class classification
+\citep{Khan2010}. Despite this, most of the techniques are too simple
+(e.g. linear or Gaussian) or fail to produce good uncertainty
+estimates. (It should also be pointed out that many other problems in
+anomaly detection and one-class classification are of a very different
+nature and, hence, the techniques developed there are not immediately
+applicable to our domain of interest.) These uncertainty estimates are
+key in order to provide the user with reliable monitoring
+signals. Green-Tech areas, including environmental monitoring and
+energy demand prediction, are still far from full automation. At
+present, what is important is to provide the user with signals that
+she can use to reach a decision. Uncertainty estimates are therefore
+of utmost importance. For this reason, we focus on developing
+\acro{gp}-based techniques to build probabilistic non-linear models of
+the latent and fault processes and, hence, deliver reliable reports.
+In addition to being able to provide posterior probabilities of
+observation faultiness, we are able to perform effective prediction
+for the latent process even in the presence of faults.
 
-GPs have been used previously for fault detection \cite{Eciolaza2001}. However, the nature of the data and setup in that domain is different from ours. This has forced us to innovate new GP-based techniques for detection and prediction in the presence of faults.
+GPs have been used previously for fault detection
+\citep{Eciolaza2001}. However, the nature of the data and setup in
+that domain is different from ours. This has forced us to innovate new
+\acro{gp}-based techniques for detection and prediction in the
+presence of faults.
 
 \section{Gaussian Processes}
-Gaussian processes provide a simple, flexible framework for
-performing Bayesian inference about functions \cite{gpml}.  A
-Gaussian process is a distribution on the functions
-$y\colon \cm{X} \to \R$ (on an arbitrary domain $\cm{X}$) with the
-property that the distribution of the function values at a finite
-subset of points $F \subseteq \cm{X}$ are multivariate Gaussian
-distributed.
+Gaussian processes provide a simple, flexible framework for performing
+Bayesian inference about functions \citep{gpml}.  A Gaussian process is
+a distribution on the functions $y\colon \cm{X} \to \R$ (on an
+arbitrary domain $\cm{X}$) with the property that the distribution of
+the function values at a finite subset of points $F \subseteq \cm{X}$
+are multivariate Gaussian distributed.
 
 A Gaussian process is completely defined by its first two moments: a
 mean function $\mu\colon \cm{X} \to \R$ and a symmetric positive
@@ -139,22 +186,13 @@ semidefinite covariance function $K\colon \cm{X} \times \cm{X} \to
 and is typically set to a constant for convenience.  The covariance
 function describes how function values are correlated as a function of
 their locations in the domain, thereby encapsulating information about
-the overall shape and behavior of the signal.  Many covariance functions are available to model a wide variety of anticipated signals.
+the overall shape and behavior of the signal.  Many covariance
+functions are available to model a wide variety of anticipated
+signals.
 
-Suppose we have chosen a Gaussian process prior distribution
-on the function $y\colon \cm{X} \to \R$,
-% \begin{equation*}
-%  p(y \given \theta)
-%  \deq
-%  \cm{GP}
-%  \bigl(
-%    y;
-%    \mu(x; \theta),
-%    K(x, x'; \theta)
-%  \bigr),
-% \end{equation*}
-and a set
-of input points $\bm{x}$, the prior distribution on $\bm{y} \deq y(\bm{x})$ is
+Suppose we have chosen a Gaussian process prior distribution on the
+function $y\colon \cm{X} \to \R$, and a set of input points $\bm{x}$,
+the prior distribution on $\bm{y} \deq y(\bm{x})$ is
 \begin{equation*}
  p(\bm{y} \given \bm{x}, \theta)
  =
@@ -172,30 +210,31 @@ and $K$, which constitute hyperparameters of the model.
 Exact measurements of the latent function are typically not available;
 however, we may combine the Gaussian process distribution on the
 latent function with an observation model that takes into account
-potential noise in our measurements. 
-Let $z(x)$ represent the realization of an observation of the
-signal at $x$ and $y(x)$ represents the value of the unknown true
-latent signal at that point.
- When the observation mechanism
-is not expected to experience faults, the usual noise model used is
+potential noise in our measurements.  Let $z(x)$ represent the
+realization of an observation of the signal at $x$ and $y(x)$
+represents the value of the unknown true latent signal at that point.
+When the observation mechanism is not expected to experience faults,
+the usual noise model used is
 \begin{equation}\label{iidnoise}
  p(z \given y, x, \sigma_n^2)
  \deq
  \cm{N}(z; y, \sigma_n^2),
 \end{equation}
 represents additive i.i.d.\space Gaussian observation noise with
-variance $\sigma_n^2$. Note that this model is inappropriate when sensors
-can experience faults, which complicate the relationship between $z$ and $y$.
+variance $\sigma_n^2$. Note that this model is inappropriate when
+sensors can experience faults, which complicate the relationship
+between $z$ and $y$.
 
 With the observation model above, given a set of observations
 $
  \data
  \deq
- \bigl\lbrace
+ \Bigl\lbrace
    \bigl( x, z(x) \bigr)
-  \bigr\rbrace
+ \Bigr\rbrace
  \deq
- ( \bm{x}, \bm{z} )$,
+ ( \bm{x}, \bm{z} )
+$,
 the posterior distribution of $y\st$ given these data is
 \begin{equation*}
  p(y\st \given \data, \theta)
@@ -245,51 +284,31 @@ where the posterior mean and covariance are
 \end{align*}
 Notice that the posterior is also a Gaussian process. 
 
-We now make some definitions for the sake of readability. Henceforth, we assume that our observations $\vz$ have already been scaled by the subtraction of the prior mean $\mu(\bm{x}; \theta)$. We will also make use of the covariance matrix shorthand $K_{m,n} \defequal K(\vx_m,\vx_n)$. Finally, for now, we'll drop the explicit dependence of our probabilities on the hyperparameters $\theta$ (it will be implicitly assumed that all quantities are conditioned on knowledge of them), and will return to them later.
-
-% \subsection{Faulty observations}
-% The observation model described above is not appropriate when sensors
-% can experience faults, because our measurements in such a situation are
-% corrupted by a more complicated process.  Figure
-% \ref{normalpredictions} demonstrates the performance of online
-% Gaussian process time-series prediction for the water level in Figure
-% \ref{hgriver} using this observation model.  The faulty observations
-% are poorly modeled by \eqref{iidnoise}, and
-% the predictions are correspondingly unsatisfactory.
-
-% \begin{figure*}
-%  \begin{centering}
-%    \psff{normalpredictions}
-%    \caption{10-step lookahead Gaussian process prediction of the river
-%      level using a standard regression model incorporating
-%      i.i.d.\space Gaussian observation noise.  The prior mean function
-%      was the zero function, the prior covariance function was a
-%      Mat\'{e}rn covariance with $\nu = \nicefrac{5}{2}$ \cite{gpml},
-%      and the observation model was the i.i.d.\space Gaussian noise
-%      (\ref{usualobservation}--\ref{iidnoise}).  The blue line shows
-%      posterior mean prediction; light blue bands represent pointwise
-%      $\pm 2$ posterior standard deviations bounds.  Observations are
-%      plotted in grey.}
-%  \end{centering}
-%  \label{normalpredictions}
-% \end{figure*}
+We now make some definitions for the sake of readability. Henceforth,
+we assume that our observations $\vz$ have already been scaled by the
+subtraction of the prior mean $\mu(\bm{x}; \theta)$. We will also make
+use of the covariance matrix shorthand $K_{m,n} \defequal
+K(\vx_m,\vx_n)$. Finally, for now, we'll drop the explicit dependence
+of our probabilities on the hyperparameters $\theta$ (it will be
+implicitly assumed that all quantities are conditioned on knowledge of
+them), and will return to them later.
 
 \section{Fault Bucket}
 Rather than specifying explicit parameters for every possible fault
-type, we propose a single catch-all ``fault
-bucket'' that can identify and treat appropriately measurements that
-are suspected of being faulty.  The basic idea is to model faulty
-observations as being generated from a Gaussian distribution with a
-very wide variance; points that are more likely under this model than
-under the normal predictive model of the Gaussian process can
-reasonably be assumed to be corrupted in some way, assuming we have a
-good understanding of the latent process. It is hoped that a very broad class of faults can be captured in this way.
+type, we propose a single catch-all ``fault bucket'' that can identify
+and treat appropriately measurements that are suspected of being
+faulty.  The basic idea is to model faulty observations as being
+generated from a Gaussian distribution with a very wide variance;
+points that are more likely under this model than under the normal
+predictive model of the Gaussian process can reasonably be assumed to
+be corrupted in some way, assuming we have a good understanding of the
+latent process. It is hoped that a very broad class of faults can be
+captured in this way.
 
-To formalize this idea, 
-%we will choose an observation noise model dependent on whether the observation is faulty. Specifically, 
-we choose an observation noise distribution to replace that in \eqref{iidnoise} that models the
-noise as independent but not identically distributed with separate
-variances for the non-fault and fault cases.
+To formalize this idea, we choose an observation noise distribution to
+replace that in \eqref{iidnoise} that models the noise as independent
+but not identically distributed with separate variances for the
+non-fault and fault cases.
 \begin{align*}
  p(z \given y, x, \neg\fault, \sigma_n^2)
  &
@@ -302,27 +321,46 @@ variances for the non-fault and fault cases.
  \cm{N}(z; y, \sigma_f^2),
 \end{align*}
 where $\fault \in \lbrace 0, 1 \rbrace$ is a binary indicator of
-whether the observation $z(x)$ was faulty and
-$\sigma_f > \sigma_n$ is the variance around the mean of faulty
-measurements.  
-% That is, when $z(x)$ is not faulty, we specify that it
-% has the normal observation noise variance $\sigma_n^2$, and when
-% $z(x)$ is faulty, we specify that it has the fault-bucket variance
-% $\sigma_f^2$. 
-The values of both $\sigma_n$ and $\sigma_f$ form hyperparameters of our model, and hence are included in $\theta$.
+whether the observation $z(x)$ was faulty and $\sigma_f > \sigma_n$ is
+the variance around the mean of faulty measurements.  The values of
+both $\sigma_n$ and $\sigma_f$ form hyperparameters of our model, and
+hence are included in $\theta$.
 
-Of course, {\it a priori}, we do not know if any given observation will be faulty or not. 
-% We'll assume henceforth the prior that any particular measurement will be faulty,
-% \begin{equation*}
-%  \fPr(\fault \given x) \deq \alpha.
-% \end{equation*}
-Unfortunately, managing our uncertainty about the faultiness of all available observations is a challenging task. If we have $N$ observations available, then there are $2^N$ possible combinations of faultiness. For even moderately sized datasets, it is computationally infeasible to correctly marginalise over the possible faultinesses of all observations.
-%evaluating all such possibilities is infeasible---it is not possible to analytically marginalise over the faultiness of all observations.
+Of course, {\it a priori}, we do not know if any given observation
+will be faulty or not.  Unfortunately, managing our uncertainty about
+the faultiness of all available observations is a challenging task. If
+we have $N$ observations available, then there are $2^N$ possible
+combinations of faultiness. For even moderately sized datasets, it is
+computationally infeasible to correctly marginalise over the possible
+faultinesses of all observations.
 
-Instead, we propose a sequential approach, applicable for ordered data such as time series. For time series, the predictant $y\st$ typically lies in the future, such that our older observations are less pertinent than our newer observations. The intuition behind our approach is to, at any time step,
- `merge' the sum over the faultiness of the most recent observation. This gives rise to an approximation of our observation of unknown faultiness as an observation of known variance, lying between between $\sigma_n^2$ and $\sigma_f^2$. The more likely an observation's faultiness, the closer its assigned variance will be to the (large) fault variance, and the less relevant it will be for inference about the latent process. This approximate observation can then be used to compute future predictions; we need never consider the full sum over all observations. Nonetheless, this approximate marginalisation over faultiness is preferable to heuristics that would designate all observations as either faulty or not; our method acknowledges the uncertainty that may exist in faultiness. 
+Instead, we propose a sequential approach, applicable for ordered data
+such as time series. For time series, the predictant $y\st$ typically
+lies in the future, such that our older observations are less
+pertinent than our newer observations. The intuition behind our
+approach is to, at any time step, `merge' the sum over the faultiness
+of the most recent observation. This gives rise to an approximation of
+our observation of unknown faultiness as an observation of known
+variance, lying between between $\sigma_n^2$ and $\sigma_f^2$. The
+more likely an observation's faultiness, the closer its assigned
+variance will be to the (large) fault variance, and the less relevant
+it will be for inference about the latent process. This approximate
+observation can then be used to compute future predictions; we need
+never consider the full sum over all observations. Nonetheless, this
+approximate marginalisation over faultiness is preferable to
+heuristics that would designate all observations as either faulty or
+not; our method acknowledges the uncertainty that may exist in
+faultiness.
 
-More formally, imagine that we have partitioned our observations $\data_{a,b}$ into a set of old observations $\data_a=(\vx_a,\vz_a)$ and a set of newer observations $\data_b = (\vx_b,\vz_b)$. Define $\vs_{a}$ as the (unknown) vector of all noise variances at observations $\vz_{a}$, and similar for $\vs_{b}$. As we have to sum over all possible values for these vectors, we'll index the values of $\vs_{a}$ by $i$ (each given by a different combination of faultinesses over $\data_a$) and the values of $\vs_{b}$ by $j$. We now define the covariances
+More formally, imagine that we have partitioned our observations
+$\data_{a,b}$ into a set of old observations $\data_a=(\vx_a,\vz_a)$
+and a set of newer observations $\data_b = (\vx_b,\vz_b)$. Define
+$\vs_{a}$ as the (unknown) vector of all noise variances at
+observations $\vz_{a}$, and similar for $\vs_{b}$. As we have to sum
+over all possible values for these vectors, we'll index the values of
+$\vs_{a}$ by $i$ (each given by a different combination of
+faultinesses over $\data_a$) and the values of $\vs_{b}$ by $j$. We
+now define the covariances
 \begin{align*}
  V_a^i & \defequal K_{a,a} + \diag \vs_{a}^i\,, \qquad
  V_b^j \defequal K_{a,a} + \diag \vs_{a}^i \\
@@ -330,7 +368,8 @@ More formally, imagine that we have partitioned our observations $\data_{a,b}$ i
 \end{align*}
 where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. 
 
-To initialise our algorithm, imagine that $a$ identifies a small set of data, such that we can readily compute
+To initialise our algorithm, imagine that $a$ identifies a small set
+of data, such that we can readily compute
 \begin{equation}
  \hspace{-0.0cm}p(\vz_a)\!=\!\sum_i  \ps{\vz_a}{\vs^i_a}\fPr(\vs^i_a)
 \!=\! \sum_i \N{\vz_a}{0}{V_a^i}\fPr(\vs_a^i) \label{eq:likelihood_a}
@@ -341,18 +380,27 @@ To initialise our algorithm, imagine that $a$ identifies a small set of data, su
 = \frac{\ps{\vz_a}{\vs_a}\fPr(\vs_a)}{p(\vz_a)} 
 = \frac{\N{\vz_a}{0}{V_a} \fPr(\vs_a)}{p(\vz_a)}\label{eq:psa}\,.
 \end{equation}
-This distribution also specifies the probability of our observations $\data_a$ being faulty; for a single observation $\data_a$,
+This distribution also specifies the probability of our observations
+$\data_a$ being faulty; for a single observation $\data_a$,
 $
 \Prob{\fault(\data_a)}{\data_{a}} = \Prob{\sigma_a = \sigma_f}{\data_{a}}
 $.
 
-If we were to perform predictions for some $y\st$ using $\data_a$ alone, we'd need to evaluate
+If we were to perform predictions for some $y\st$ using $\data_a$
+alone, we'd need to evaluate
 \begin{align*}
 &\p{y\st}{\data_{a}} = \sum_{i} \Prob{\vs^i_{a}}{\data_a} \p{y\st}{\data_a, \vs^{i}_{a}}\nonumber\\
 &=\sum_{i} \Prob{\vs^i_{a}}{\data_a} \N{y\st}{\mean{y\st}{\data_a, \vs^{i}_{a}}}{\cov{y\st}{\data_a, \vs^{i}_{a}}}
 \end{align*}
-the weighted sum of Gaussian predictions made using the different possible values for $\vs_{a}$. 
-Now, we'll perform the `merging' that we discussed earlier, by approximating this sum of Gaussians as a moment-matched single Gaussian. It's our hope that our predictions for $y\st$ are not so sensitive to the noise in our observations that all such Gaussians are dramatically different. Further, the quality of this approximation will improve over time---if $y\st$ is far removed from our old data $\data_a$, then our predictions really will not be very sensitive to $\sigma_a$. As such, we arrive at
+the weighted sum of Gaussian predictions made using the different
+possible values for $\vs_{a}$.  Now, we'll perform the `merging' that
+we discussed earlier, by approximating this sum of Gaussians as a
+moment-matched single Gaussian. It's our hope that our predictions for
+$y\st$ are not so sensitive to the noise in our observations that all
+such Gaussians are dramatically different. Further, the quality of
+this approximation will improve over time---if $y\st$ is far removed
+from our old data $\data_a$, then our predictions really will not be
+very sensitive to $\sigma_a$. As such, we arrive at
 \begin{align}
  &\p{y\st}{\data_{a}} \simeq \N{y\st}{\amean{y\st}{\data_a}}{\acov{y\st}{\data_a}}\,,\label{eq:pya}
 \end{align}
@@ -368,10 +416,12 @@ for
  \tilde{V}_a^{-1}  & \defequal \sum_i \Prob{\vs^i_{a}}{\data_a} (V_a^i)^{-1}\nonumber\\
  \tilde{W}_a^{-1} & \defequal \sum_i \Prob{\vs^i_{a}}{\data_a} (V_a^i)^{-1}\vz_a \vz_a^\tr (V_a^i)^{-1}\,.\label{eq:Wa}
 \end{align}
-Note that for $\tilde{W}_a$, explicitly computing (unstable) matrix inverses can be avoided by solving the appropriate linear equations using Cholesky factors. 
-% Explicitly, if we solve for $K_{\star,a} ({V}^i_a)^{-1} \vz_a$ for all $i$, we can efficiently determine $K_{\star,a}\tilde{W}_a^{-1} K_{a,\star}$. 
-For $\tilde{V}_a$, we can rewrite
-$(A^{-1}+B^{-1})^{-1} = A (A+B)^{-1} B$. If $i\in\{0,1\}$ (as it would be if $a$ identified a single observation which could be either faulty or not),
+Note that for $\tilde{W}_a$, explicitly computing (unstable) matrix
+inverses can be avoided by solving the appropriate linear equations
+using Cholesky factors.  For $\tilde{V}_a$, we can rewrite
+$(A^{-1}+B^{-1})^{-1} = A (A+B)^{-1} B$. If $i\in\{0,1\}$ (as it would
+be if $a$ identified a single observation which could be either faulty
+or not),
 \begin{align} \label{eq:inverse_trick}
 \tilde{V}_a & = V^0_a\bigl(
 \Prob{\vs^1_{a}}{\data_a} V^0_a 
@@ -379,18 +429,25 @@ $(A^{-1}+B^{-1})^{-1} = A (A+B)^{-1} B$. If $i\in\{0,1\}$ (as it would be if $a$
 \Prob{\vs^0_{a}}{\data_a} V^1_a
 \bigr)^{-1}V^1_a\,.
 \end{align}
-If $i$ takes more than two values, we can simply iterate using the same technique. Having used \eqref{eq:inverse_trick} to compute $\tilde{V}_a$, we can then calculate
+If $i$ takes more than two values, we can simply iterate using the
+same technique. Having used \eqref{eq:inverse_trick} to compute
+$\tilde{V}_a$, we can then calculate
 \begin{align}
  \tilde{R}_a & \defequal \chol \tilde{V}_a \label{eq:Ra} \\
  \tilde{T}_a & \defequal \chol (\tilde{R}_a)^{-1} \vz_a \label{eq:Ta} \,,
 \end{align}
-and use them, along with \eqref{eq:Wa}, to efficiently determine \eqref{eq:ameana} and \eqref{eq:acova}.
+and use them, along with \eqref{eq:Wa}, to efficiently determine
+\eqref{eq:ameana} and \eqref{eq:acova}.
 
-Now, these calculations performed, we imagine receiving further data $\data_b$. We perform predictions now as
+Now, these calculations performed, we imagine receiving further data
+$\data_b$. We perform predictions now as
 \begin{align*}
 \p{y\st}{\data_{a,b}} & = \sum_{i} \sum_{j} \p{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}} \Prob{\vs^{i,j}_{a,b}}{\data_{a,b}}\,.
 \end{align*}
-The full sums here can easily become too large to actually evaluate. To simplify, we assume that our later observations are independent of the noise in our earlier observations. To be more precise, we approximate as
+The full sums here can easily become too large to actually
+evaluate. To simplify, we assume that our later observations are
+independent of the noise in our earlier observations. To be more
+precise, we approximate as
 \begin{align} \label{eq:approx}
 %\p{\vs^j_{b},\data_b}{\vs^i_{a},\data_a} & \simeq \p{\vs^j_{b},\data_b}{\data_a} \text{giving}\\
 \Prob{\vs^{i,j}_{a,b}}{\data_{a,b}} & \simeq \Prob{\vs^i_{a}}{\data_a}\,\Prob{\vs^j_{b}}{\data_{a,b}}\,,
@@ -400,10 +457,12 @@ and
 \hspace{-0.2cm}\p{y\st}{\data_{a,b}} & \simeq \!\sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}}\!\sum_{i} \Prob{\vs^i_{a}}{\data_a} \p{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}}\nonumber\\
 & =\!\sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}}\!\sum_{i} \Prob{\vs^i_{a}}{\data_a}\nonumber\\& \hspace{-0.8cm} \N{y\st}{\mean{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}}}{\cov{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}}}\,.\label{eq:sum_o_Gaussians}
 \end{align}
-Before trying to manage these sums, let's determine $\Prob{\vs_b}{\data_{a,b}}$. As before, this distribution gives us the probability of observations $\data_b$ being faulty. For example, if we have only a single observation $\data_b$,
-$
-\Prob{\fault(\data_b)}{\data_{a,b}} = \Prob{\sigma_b = \sigma_f}{\data_{a,b}}
-$.
+Before trying to manage these sums, let's determine
+$\Prob{\vs_b}{\data_{a,b}}$. As before, this distribution gives us the
+probability of observations $\data_b$ being faulty. For example, if we
+have only a single observation $\data_b$, $
+\Prob{\fault(\data_b)}{\data_{a,b}} = \Prob{\sigma_b =
+  \sigma_f}{\data_{a,b}} $.
 
  Moving on, we define
 \begin{align}
@@ -414,7 +473,10 @@ K_{b,a} \tilde{V}_a^{-1} \vz_a \label{eq;ameanba}
 & \defequal V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b} \nonumber\\
 & \hspace{2.8cm} - \amean{\vz_b}{\data_{a,b}}^2 \,. \label{eq;acovba}
 \end{align}
-where both $\tilde{V}_a$ (or its Cholesky factor) and $\tilde{W}_a^{-1}$ were computed previously. By using \eqref{eq:approx} and again approximating a sum of Gaussians as a single Gaussian,
+where both $\tilde{V}_a$ (or its Cholesky factor) and
+$\tilde{W}_a^{-1}$ were computed previously. By using
+\eqref{eq:approx} and again approximating a sum of Gaussians as a
+single Gaussian,
 \begin{align}
 \Prob{\vs_b}{\data_{a,b}} & = \frac{\sum_i \p{\vz_b}{\data_a,\vs^i_{a,b}}p(\vz_a,\vs^i_{a,b})}{p(\vz_{a,b})}\nonumber\\
 & \simeq \frac{\sum_i \ps{\vz_b}{\data_a,\vs^i_{a,b}}\fPr(\vs_a^i\mid{\data_a})\fPr(\vs_{b})}{\ps{\vz_{b}}{\data_a}}\nonumber\\
@@ -427,9 +489,14 @@ where we have
 & \simeq \sum_i \sum_j \p{\vz_b}{\data_a,\vs^i_{a,b}}\Prob{\vs_a^i}{\data_a}\fPr(\vs_{b}^j)\nonumber\\
 & \simeq \sum_j \N{\vz_b}{\amean{\vz_b}{\data_a}}{\acov{\vz_b}{\data_a, \vs_b^j}} \fPr(\vs_b^j)\,.\label{eq:likelihood_b}
 \end{align}
-Note that the product of \eqref{eq:likelihood_b} and \eqref{eq:likelihood_a} gives the likelihood of our hyperparameters. 
+Note that the product of \eqref{eq:likelihood_b} and
+\eqref{eq:likelihood_a} gives the likelihood of our hyperparameters.
 
-Now, returning to \eqref{eq:sum_o_Gaussians}, we will once again approximate a sum of Gaussians  as a moment-matched single Gaussian. Our goal here is to re-use our previously evaluated sums over $i$ to resolve future sums over $i$. As we gain more data, the faultiness of very old data becomes less important. We arrive at
+Now, returning to \eqref{eq:sum_o_Gaussians}, we will once again
+approximate a sum of Gaussians as a moment-matched single
+Gaussian. Our goal here is to re-use our previously evaluated sums
+over $i$ to resolve future sums over $i$. As we gain more data, the
+faultiness of very old data becomes less important. We arrive at
 \begin{align}
 \p{y\st}{\data_{a,b}} & \simeq \N{y\st}{\amean{y\st}{\data_{a,b}}}{\acov{y\st}{\data_{a,b}}}\,,\label{eq:pyab}
 \end{align}
@@ -467,7 +534,15 @@ Note that $({V}^{i,j}_{a,b})^{-1}$ is affine in $S^{i,j}_a$, so that where
 \begin{equation}\label{eq:V_a_big}
  V_a \gg K_{a,b} V_b^{-1} K_{b,a}\,,
 \end{equation}
-$({V}^{i,j}_{a,b})^{-1}$ is effectively affine in $(V^i_a)^{-1}$. \eqref{eq:V_a_big} is true if, given $\data_b$, you are unable to accurately predict $\data_a$. This might be the case if $\data_a$ represents a lot of information relative to $\data_b$ (if, for example, $\data_a$ is our entire history of observations where $\data_b$ is simply the most recent observation), or if $\data_b$ and $\data_a$ are simply not particularly well-correlated. On this basis, \eqref{eq:V_a_big} seems reasonable for our application. Defining the affine $f: (V^i_a)^{-1} \mapsto ({V}^{i,j}_{a,b})^{-1}$, then, and as
+$({V}^{i,j}_{a,b})^{-1}$ is effectively affine in
+$(V^i_a)^{-1}$. \eqref{eq:V_a_big} is true if, given $\data_b$, you
+are unable to accurately predict $\data_a$. This might be the case if
+$\data_a$ represents a lot of information relative to $\data_b$ (if,
+for example, $\data_a$ is our entire history of observations where
+$\data_b$ is simply the most recent observation), or if $\data_b$ and
+$\data_a$ are simply not particularly well-correlated. On this basis,
+\eqref{eq:V_a_big} seems reasonable for our application. Defining the
+affine $f: (V^i_a)^{-1} \mapsto ({V}^{i,j}_{a,b})^{-1}$, then, and as
 $\sum_i \Prob{\vs^i_{a}}{\data_{a}} = 1$,
 $$
 \sum_i \Prob{\vs^i_{a}}{\data_{a}} f\bigl((V^i_a)^{-1} \bigr) \simeq f\Bigl(\sum_i \Prob{\vs^i_{a}}{\data_{a}}(V^i_a)^{-1} \Bigr)
@@ -493,57 +568,54 @@ where
 \begin{equation*}
  \tilde{V}^{-1}_{b|a} \defequal \sum_j \Prob{\vs^j_{b}}{\data_{a,b}} (V^j_b -K_{b,a} \tilde{V}_a^{-1}K_{a,b})^{-1}
 \end{equation*}
-which, if $b$ identifies a single observation and $j\in\{0,1\}$, can be computed using the same trick as in \eqref{eq:inverse_trick}. Note that the lower right hand element of $\tilde{V}_{a,b}$ defines the noise variance to be associated with observations $\data_b$. As before, we determine our predictions \eqref{eq:pyab} by solving linear equations using the quantities
+which, if $b$ identifies a single observation and $j\in\{0,1\}$, can
+be computed using the same trick as in \eqref{eq:inverse_trick}. Note
+that the lower right hand element of $\tilde{V}_{a,b}$ defines the
+noise variance to be associated with observations $\data_b$. As
+before, we determine our predictions \eqref{eq:pyab} by solving linear
+equations using the quantities
 \begin{align}
  \tilde{R}_{a,b} & \defequal \chol \tilde{V}_{a,b} \label{eq:Rab} \\
  \tilde{T}_{a,b} & \defequal \chol (\tilde{R}_{a,b})^{-1} \vz_a \label{eq:Tab} \,,
 \end{align}
-both of which can be efficiently determined \citep[Appendix B]{osbornebayesian} using the evaluated $\tilde{R}_a$ and $\tilde{T}_a$.
+both of which can be efficiently determined \citep[Appendix
+  B]{osbornebayesian} using the evaluated $\tilde{R}_a$ and
+$\tilde{T}_a$.
 
-We now turn to $\tilde{W}_{a,b}^{-1}$. Unfortunately, even if \eqref{eq:V_a_big} were true, $\tilde{W}_{a,b}^{-1}$ is quadratic in $(V^i_a)^{-1}$. We will nonetheless assume that $\tilde{W}_{a,b}^{-1}$ is affine in $(V^i_a)^{-1}$. The quality of our approximation for $\tilde{W}_{a,b}^{-1}$ is much less critical than for $\tilde{V}^{-1}_{a,b}$, as the former only influences the variance of our predictions for the current predictant; any flaws in the approximation will not be propagated forward, multiplying in influence. Further, of course, where one probability dominates, $\Prob{\vs^i_{a}}{\data_{a}}\gg \Prob{\vs^{i'}_{a}}{\data_{a}} \forall i' \neq i$,, the approximation is valid. With our approximation,
+We now turn to $\tilde{W}_{a,b}^{-1}$. Unfortunately, even if
+\eqref{eq:V_a_big} were true, $\tilde{W}_{a,b}^{-1}$ is quadratic in
+$(V^i_a)^{-1}$. We will nonetheless assume that $\tilde{W}_{a,b}^{-1}$
+is affine in $(V^i_a)^{-1}$. The quality of our approximation for
+$\tilde{W}_{a,b}^{-1}$ is much less critical than for
+$\tilde{V}^{-1}_{a,b}$, as the former only influences the variance of
+our predictions for the current predictant; any flaws in the
+approximation will not be propagated forward, multiplying in
+influence. Further, of course, where one probability dominates,
+$\Prob{\vs^i_{a}}{\data_{a}}\gg \Prob{\vs^{i'}_{a}}{\data_{a}} \forall
+i' \neq i$,, the approximation is valid. With our approximation,
 \begin{align}
 \tilde{W}^{-1}_{a,b} \defequal
 & \sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}} (\hat{V}_{a,b}^{j})^{-1}\vz_{a,b}^{\phantom{\tr}} \vz_{a,b}^\tr (\hat{V}_{a,b}^{i,j})^{-1}\,.\label{eq:Wab}
 \end{align}
 and can solve for $K_{\star,(a,b)}\tilde{W}^{-1}_{a,b}K_{(a,b),\star}$ by efficiently updating using the previously computed quantity $\tilde{T}_{a}$.
 
-% However, defining $g:(V^i_a)^{-1} \mapsto \tilde{W}_{a,b}^{-1}$ as
-% \begin{align*}
-% & g((V^i_a)^{-1}) = \alpha (V^i_a)^{-2} + \beta (V^i_a)^{-1} + \gamma \\
-% &
-% %\textstyle
-% \sum_i  \Prob{\vs^i_{a}}{\data_{a}} g((V^i_a)^{-1}) 
-% = \\
-% &
-% %\textstyle
-% \alpha \sum_i  \Prob{\vs^i_{a}}{\data_{a}}(V^i_a)^{-2} + \beta \sum_i  \Prob{\vs^i_{a}}{\data_{a}} (V^i_a)^{-1} + \gamma\\
-% & 
-% %\textstyle
-% \simeq \alpha (\sum_i  \Prob{\vs^i_{a}}{\data_{a}}(V^i_a)^{-1})^2 + \beta \sum_i  \Prob{\vs^i_{a}}{\data_{a}} (V^i_a)^{-1} \\
-% &\quad \quad + \gamma\,,
-% \end{align*}
-% as squaring the (normalised) probabilities $\Prob{\vs^i_{a}}{\data_{a}}$ usually leaves one, dominant, probability essentially unchanged at near to one and the rest effectively remaining at zero. 
-
-
-
-\begin{figure*}
- \begin{centering}
- \psff{faultpredictions}
- \caption{10-step lookahead Gaussian-process prediction of the river
-   level using a standard regression model incorporating
-   fault-bucket Gaussian observation noise.  The prior mean function
-   was the zero function, the prior covariance function was a
-   Mat\'{e}rn covariance with $\nu = \nicefrac{5}{2}$, and the
-   observation model was the fault-bucket noise model.  The blue
-   line shows posterior mean prediction; light blue bands represent
-   pointwise $\pm 2$ posterior standard deviations bounds.
-   Observations are plotted in a color that is indicative of their
-   inferred fault probabilities; the more red an observation is, the
-   higher the posterior probability of its being a fault.}
- \end{centering}
- \label{faultpredictions}
-\end{figure*}
-
+%% \begin{figure*}
+%%  \begin{centering}
+%%  \psff{faultpredictions}
+%%  \caption{10-step lookahead Gaussian-process prediction of the river
+%%    level using a standard regression model incorporating
+%%    fault-bucket Gaussian observation noise.  The prior mean function
+%%    was the zero function, the prior covariance function was a
+%%    Mat\'{e}rn covariance with $\nu = \nicefrac{5}{2}$, and the
+%%    observation model was the fault-bucket noise model.  The blue
+%%    line shows posterior mean prediction; light blue bands represent
+%%    pointwise $\pm 2$ posterior standard deviations bounds.
+%%    Observations are plotted in a color that is indicative of their
+%%    inferred fault probabilities; the more red an observation is, the
+%%    higher the posterior probability of its being a fault.}
+%%  \end{centering}
+%%  \label{faultpredictions}
+%% \end{figure*}
 
 \begin{algorithm}[tb]
    \caption{Fault Bucket}
@@ -578,41 +650,67 @@ and can solve for $K_{\star,(a,b)}\tilde{W}^{-1}_{a,b}K_{(a,b),\star}$ by effici
 \end{algorithm}
 
 An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
-% This completely specifies the fault-bucket model for predicting
-% signals with arbitrary unspecified faults.
 
 \subsection{Discussion}
 
-Firstly, we return to the management of our hyperparameters $\theta$. Unfortunately, analytically marginalising $\theta$ is impossible. Most of the hyperparameters of our model can be set by optimising their likelihood on a large training set, giving a likelihood close to a delta function. This is not true of the hyperparameters $\sigma_n$ and $\sigma_f$, due to exactly the same problematic sums discussed earlier. Instead, we marginalise these hyperparameters online using Bayesian Monte Carlo \citep[Chapter 7]{osbornebayesian}, taking a fixed set of samples in their values, and using the hyperparameter likelihoods (computed in \eqref{eq:likelihood_a} and \eqref{eq:likelihood_b}) to construct weights over them. Essentially, Algorithm \ref{alg:fault_bucket} is run in parallel for each sample, and the predictions from each combined in a weighted mixture. Note that we can use a similar procedure \cite{garnettosborne} to determine the full posterior for $\sigma_n$ and $\sigma_f$.
-It would be desirable to use non-fixed samples, but, unfortunately, this would require Algorithm \ref{alg:fault_bucket} to be re-run from scratch each time a sample is moved. 
+Firstly, we return to the management of our hyperparameters
+$\theta$. Unfortunately, analytically marginalising $\theta$ is
+impossible. Most of the hyperparameters of our model can be set by
+optimising their likelihood on a large training set, giving a
+likelihood close to a delta function. This is not true of the
+hyperparameters $\sigma_n$ and $\sigma_f$, due to exactly the same
+problematic sums discussed earlier. Instead, we marginalise these
+hyperparameters online using Bayesian Monte Carlo \citep[Chapter
+  7]{osbornebayesian}, taking a fixed set of samples in their values,
+and using the hyperparameter likelihoods (computed in
+\eqref{eq:likelihood_a} and \eqref{eq:likelihood_b}) to construct
+weights over them. Essentially, Algorithm \ref{alg:fault_bucket} is
+run in parallel for each sample, and the predictions from each
+combined in a weighted mixture. Note that we can use a similar
+procedure \citep{garnettosborne} to determine the full posterior for
+$\sigma_n$ and $\sigma_f$.  It would be desirable to use non-fixed
+samples, but, unfortunately, this would require Algorithm
+\ref{alg:fault_bucket} to be re-run from scratch each time a sample is
+moved.
 
-The proposal in Algorithm \ref{alg:fault_bucket} can be extended in several ways. Firstly, we may wish to sum over a number of possible variances greater than two---useful if observations are prone to faultiness in more than one mode. 
-Note that if, instead of summing over a small number of known variances, we wish to marginalise with respect to a density over noise variance, we simply replace the sums over $i$ and $j$ with appropriate integrals. Obvously this will only be analytically possible if the posteriors for $\sigma_a$ take appropriate, simple forms. 
-% If we had uniform posteriors over some bounded region, for example, we could make use of arctan functions. 
-These extensions would allow our algorithm to tackle the general problem of heteroskedasticity.
+The proposal in Algorithm \ref{alg:fault_bucket} can be extended in
+several ways. Firstly, we may wish to sum over a number of possible
+variances greater than two---useful if observations are prone to
+faultiness in more than one mode.  Note that if, instead of summing
+over a small number of known variances, we wish to marginalise with
+respect to a density over noise variance, we simply replace the sums
+over $i$ and $j$ with appropriate integrals. Obvously this will only
+be analytically possible if the posteriors for $\sigma_a$ take
+appropriate, simple forms.  These extensions would allow our algorithm
+to tackle the general problem of heteroskedasticity.
 
-Our proposed algorithm steps through our data one at a time, so that $\data_b$ always contains only a single observation. However, it would be possible in general to step in larger chunks, evaluating larger sums. While more computationally demanding, this might be expected to improve results. It would also allow us to consider non-diagonal noise contributions.
+Our proposed algorithm steps through our data one at a time, so that
+$\data_b$ always contains only a single observation. However, it would
+be possible in general to step in larger chunks, evaluating larger
+sums. While more computationally demanding, this might be expected to
+improve results. It would also allow us to consider non-diagonal noise
+contributions.
 
-We have so far not specified our prior for faultiness (as expressed by $p(\sigma_a)$ and $p(\sigma_b)$). Within this paper, we consider exclusively a time-independent probability of faultiness. However, within the framework afforded by our approximation \eqref{eq:approx}, we are free to consider noise variances that are expected to change over time.
+We have so far not specified our prior for faultiness (as expressed by
+$p(\sigma_a)$ and $p(\sigma_b)$). Within this paper, we consider
+exclusively a time-independent probability of faultiness. However,
+within the framework afforded by our approximation \eqref{eq:approx},
+we are free to consider noise variances that are expected to change
+over time.
 
 In some contexts it might be useful to perform inference about the
-fault contribution, rather than the signal of interest.  
-% For example,
-% perhaps understanding the nature of the correlated noise in Figure
-% \ref{hgriver} could be beneficial for maintaining or improving the
-% performance of the downstream dam.  
-This task is trivial; we merely switch the roles of the fault and non-fault
+fault contribution, rather than the signal of interest.  This task is
+trivial; we merely switch the roles of the fault and non-fault
 contributions.  To make a prediction about a potential faulty signal
 at $x$, we follow exactly the same procedure as above, substituting
 $\sigma_n^2$ for $\sigma_f^2$.
 
 \begin{figure*}
   \centering
+  \psff{bias}
+  \psff{dynamics}
   \psff{painting}
-  \psff{painting}
-  \psff{painting}
-  \psff{painting}
-  \psff{painting}
+  \psff{fishkiller}
   \label{test}
 \end{figure*}
 
@@ -623,50 +721,14 @@ system had correctional or responsive actions that it could take when
 such an event occurred.  Fortunately, we can address this problem
 using simple Bayesian decision theory.
 
-%\section{Example}
-
-% We also performed offline retrospective prediction of both the
-% water-level signal as well as the fault contribution using the fault
-% probabilities inferred by the online prediction algorithm.  The
-% results are displayed in Figures \ref{offlinesignal} and
-% \ref{offlinefault}, respectively.  Both are predicted quite
-% accurately, even without performing extra work to better learn the
-% fault probabilities learned from the online method.
-% \begin{figure*}
-%  \begin{centering}
-%  \psff{offlinesignal}
-%  \caption{Retrospective Gaussian-process prediction of the river
-%    level using the model described in the text for Figure
-%    \ref{faultpredictions}.  The blue line shows posterior mean
-%    prediction; light blue bands represent pointwise $\pm 2$
-%    posterior standard deviations bounds.  Observations are plotted
-%    in a color that is indicative of their inferred fault
-%    probabilities; the more red an observation is, the higher the
-%    posterior probability of its being a fault.}
-%  \end{centering}
-%  \label{offlinesignal}
-% \end{figure*}
-% \begin{figure*}
-%  \begin{centering}
-%  \psff{offlinefault}
-%  \caption{Retrospective Gaussian-process prediction of the faulty
-%    contributions to the river-level signal using the model described
-%    in the text for Figure \ref{faultpredictions}.  The blue line
-%    shows posterior mean prediction; light blue bands represent
-%    pointwise $\pm 2$ posterior standard deviations bounds.
-%    Observations are plotted in a color that is indicative of their
-%    inferred fault probabilities; the more red an observation is, the
-%    higher the posterior probability of its being a fault.}
-%  \label{offlinefault}
-%  \end{centering}
-% \end{figure*}
-
 \section{Results}
 We test the effectiveness of the fault bucket on several time-series
 datasets that are indicative of problems found in environmental
 monitoring. In particular, we test on water level readings; such data
 is often characterized by complex dynamics and will thus provide a
-good indicator of performance in real-world tasks. We aim to improve upon the simple, human-supervised approaches to fault detection used in this field \cite{wagner2006guidelines}. For a quantitative
+good indicator of performance in real-world tasks. We aim to improve
+upon the simple, human-supervised approaches to fault detection used
+in this field \citep{wagner2006guidelines}. For a quantitative
 assessment, we use three semi-synthetic datasets where a typical fault
 has been injected into clean sensor data. We then analyze qualitative
 performance on two real data sets with actual faults. All measurements
@@ -679,7 +741,7 @@ we performed 10-step lookahead online prediction on the river-level
 function using a zero-mean Gaussian process prior distribution and the
 fault-bucket observation model.  The covariance function was chosen to
 be a Mat\'{e}rn covariance with parameter $\nu = \nicefrac{5}{2}$
-\cite{gpml}.  The hyperparameters of the non-fault model (the
+\citep{gpml}.  The hyperparameters of the non-fault model (the
 characteristic input and output scales and the noise variance
 $\sigma_n^2$) were learned offline via maximum-likelihood--II
 estimation on a disjoint segment of uncorrupted data.  The fault
@@ -694,35 +756,81 @@ very small amount of prior knowledge about faults that the
 fault-bucket model incorporates beyond ``faulty observations are
 unpredictable.''
 
-
 \subsection{Synthetic Bias Fault}
 Our first synthetic example concerns a simple sensor error where
-measurements are temporarily adjusted by a constant offset, but otherwise remain
-accurate. This could happen if the sensor undergoes physical trauma
-which results in a loss of calibration.
+measurements are temporarily adjusted by a constant offset, but
+otherwise remain accurate. This could happen if the sensor undergoes
+physical trauma which results in a loss of calibration.
+
 \subsection{Synthetic Anomaly}
 In this dataset, the water level rises quickly, but smoothly, before
 returning back to normal. This would be indicative of a genuine
 environmental event such as a flash flood.
+
 \subsection{Painting}
 Painting is an error that occurs when ice builds on a sensor obscuring
 some of the readings. It is characterized by frequent sensor spikes
 interlaced with the original, and still accurate signal.
+
 \subsection{Fishkiller}
-Our final dataset, which we dub ``fishkiller'', comes from a sensor near
-a dam on a river in British Columbia, Canada. It contains an otherwise
-normal water level reading that is occasionally interrupted by a short
-period of rapid oscillation. This occurs when dam operators open and
-close the floodgates too quickly. When this happens, the water level
-on the other side of the dam experiences a rapid drop during which
-time salmon can become trapped on the shores and stranded, leading to
-suffocation. Detecting these events is critical to proper regulation
-of dams in order to save the lives these fish.
-\subsection{Stuck Sensor}
-To illustrate our approach to sensor fault detection, we also tested on a network of weather sensors located on the south coast of England\footnote{The network is maintained by the Bramblemet/Chimet Support Group and funded by organisations including the Royal National Lifeboat Institution, Solent Cruising and Racing Association and Associated British Ports.}. We considered the readings from the Sotonmet sensor, which makes measurements of a number of environmental variables (including wind speed and direction, air temperature, sea temperature, and tide height) and makes up-to-date sensor measurements available through separate web pages (see \url{http://www.sotonmet.co.uk}). We performed on-line prediction over tide height data in which readings from the sensor became stuck at an incorrect value. 
+Our final dataset, which we dub ``fishkiller'', comes from a sensor
+near a dam on a river in British Columbia, Canada. It contains an
+otherwise normal water level reading that is occasionally interrupted
+by a short period of rapid oscillation. This occurs when dam operators
+open and close the floodgates too quickly. When this happens, the
+water level on the other side of the dam experiences a rapid drop
+during which time salmon can become trapped on the shores and
+stranded, leading to suffocation. Detecting these events is critical
+to proper regulation of dams in order to save the lives these fish.
+
+\subsection{Quantitative results}
+\begin{table}
+  \centering
+  \caption{Quantitative comparison of different algorithms on the
+    synthetic datasets.  For each dataset, the mean squared error
+    (\textsc{mse}), the log likelihood of the true data ($\log
+    p(\data \given \cm{M})$), and the true-positive and false-positive
+    rates of detection for faulty points (\textsc{tpr} and
+    \textsc{fpr}), respectively, are shown.  The top half of the
+    table refers to the bias dataset; the bottom half to the
+    change-in-dynamics dataset.}
+  \label{tbl:results}
+  \begin{tabular}{ccccc}
+    \toprule
+    Method & \scshape{mse} & $\log p(\data \given \cm{M})$ & \scshape{tpr} & \scshape{fpr} \\
+    \cmidrule{1-1} \cmidrule(l){2-5} 
+    \scshape{kf} & 0 & 0 & 0 & 0 \\
+    \scshape{fb} & 0.034 & -360 & 0.997 & 0.011 \\
+    \midrule
+    \scshape{kf} & 0 & 0 & 0 & 0 \\
+    \scshape{fb} & 0.075 & $-1.30 \times 10^4$ & 0.7988 & 0.006 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+%% \subsection{Stuck Sensor}
+%% To illustrate our approach to sensor fault detection, we also tested
+%% on a network of weather sensors located on the south coast of
+%% England\footnote{The network is maintained by the Bramblemet/Chimet
+%%   Support Group and funded by organisations including the Royal
+%%   National Lifeboat Institution, Solent Cruising and Racing
+%%   Association and Associated British Ports.}. We considered the
+%% readings from the Sotonmet sensor, which makes measurements of a
+%% number of environmental variables (including wind speed and direction,
+%% air temperature, sea temperature, and tide height) and makes
+%% up-to-date sensor measurements available through separate web pages
+%% (see \url{http://www.sotonmet.co.uk}). We performed on-line prediction
+%% over tide height data in which readings from the sensor became stuck
+%% at an incorrect value.
 
 \section{Conclusions}
-We have proposed a novel algorithm, Fault Bucket, for managing time series data corrupted by faults unknown ahead of time. The chief theoretical contribution of the paper is a sequential algorithm for marginalising over the possible faultiness of all observations. This allows for fast, principled prediction in the presence of unknown faults.
+We have proposed a novel algorithm, Fault Bucket, for managing time
+series data corrupted by faults unknown ahead of time. The chief
+theoretical contribution of the paper is a sequential algorithm for
+marginalising over the possible faultiness of all observations. This
+allows for fast, principled prediction in the presence of unknown
+faults.
 
 \bibliography{fault_bucket_icml_2011}
 \bibliographystyle{icml2011}
