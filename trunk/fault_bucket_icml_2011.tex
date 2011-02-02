@@ -316,10 +316,9 @@ model and are hence included in $\theta$.
 Of course, {\it a priori}, we do not know whether any given
 observation will be faulty.  Unfortunately, managing our uncertainty
 about the ``faultiness'' of all available observations is a
-challenging task. If we have $N$ observations available, then there
-are $2^N$ possible assignments of faultiness. For even moderately
-sized datasets, it is computationally infeasible to correctly
-marginalize over all these possible values.
+challenging task. With $N$ observations available, there are $2^N$
+possible assignments of faultiness. It quickly becomes computationally
+infeasible to marginalize over all these possible values.
 
 Instead, we propose a sequential approach, applicable for ordered data
 such as time series. For time series, the value to be predicted $y\st$
@@ -350,8 +349,8 @@ $\vs_{a}$ by $i$ (each given by a different combination of
 faultinesses over $\data_a$) and the values of $\vs_{b}$ similarly by
 $j$. We now define the covariances
 \begin{align*}
- V_a^i & \defequal K_{a,a} + \diag \vs_{a}^i, \qquad
- V_b^j \defequal K_{a,a} + \diag \vs_{a}^i, \\
+ V_a^i & \defequal K_{a,a} + \diag \vs_{a}^i,\\
+ V_b^j & \defequal K_{a,a} + \diag \vs_{a}^i, \\
  V_{a,b}^{i,j} & \defequal K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\},
 \end{align*}
 where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. 
@@ -437,13 +436,13 @@ The full sums here can easily become too large to actually
 evaluate. To simplify, we assume that our later observations are
 independent of the noise in our earlier observations. To be precise, we approximate as
 \begin{align} \label{eq:approx}
-\Prob{\vs^{i,j}_{a,b}}{\data_{a,b}} & \simeq \Prob{\vs^i_{a}}{\data_a}\,\Prob{\vs^j_{b}}{\data_{a,b}}
+\Prob{\vs^{i,j}_{a,b}}{\data_{a,b}} & \simeq \Prob{\vs^i_{a}}{\data_a}\,\Prob{\vs^j_{b}}{\data_{a,b}},
 \end{align}
 giving
 \begin{align}
 p(y\st \given& \data_{a,b}) &\nonumber\\
 \simeq {}& \sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}}\sum_{i} \Prob{\vs^i_{a}}{\data_a} \p{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}}\nonumber\\
-= {}&\sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}}\sum_{i} \Prob{\vs^i_{a}}{\data_a}\times\nonumber 
+= {}&\sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}}\sum_{i} \Prob{\vs^i_{a}}{\data_a}\times {}\nonumber 
 \\
 & \cm{N}\bigl(y\st; \mean{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}}, \cov{y\st}{\data_{a,b}, \vs^{i,j}_{a,b}}\bigr).\label{eq:sum_o_Gaussians}
 \end{align}
@@ -452,7 +451,7 @@ Before trying to manage these sums, we will determine $p(\vs_b \given
 of the observations $\data_b$ being faulty. For example, if we have
 only a single observation $\data_b$, $
 p\bigl(\fault(\data_b) \given \data_{a,b}\bigr) = \Prob{\sigma_b =
-  \sigma_f}{\data_{a,b}} $. Moving on, we define
+  \sigma_f}{\data_{a,b}} $. We define
 \begin{align*}
 \amean{\vz_b}{\data_a} \defequal {} &
 K_{b,a} \tilde{V}_a^{-1} \vz_a %\label{eq;ameanba}
@@ -546,9 +545,9 @@ Therefore, for
 \\
  K_{b,a} & V^j_b
 \end{bmatrix},
-%\\
-\ 
-\tilde{V}^{-1}_{a,b} \simeq \sum_j \Prob{\vs^j_{b}}{\data_{a,b}} (\hat{V}^{j}_{a,b})^{-1},
+\\
+%\ 
+\tilde{V}^{-1}_{a,b} &\simeq \sum_j \Prob{\vs^j_{b}}{\data_{a,b}} (\hat{V}^{j}_{a,b})^{-1},
 \nonumber\\
 \tilde{V}_{a,b} & \simeq
 \begin{bmatrix}
@@ -587,7 +586,7 @@ if one probability dominates,
 \Prob{\vs^i_{a}}{\data_{a}}\gg
 \Prob{\vs^{i'}_{a}}{\data_{a}} \quad \forall i' \neq i,
 \end{equation*} 
-then the approximation is valid. With our approximation,
+then the approximation is valid. With this,
 \begin{align}
 \tilde{W}^{-1}_{a,b} \defequal
 & \sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}} (\hat{V}_{a,b}^{j})^{-1}\vz_{a,b}^{\phantom{\tr}} \vz_{a,b}^\tr (\hat{V}_{a,b}^{i,j})^{-1}\,.\label{eq:Wab}
@@ -738,7 +737,7 @@ For a quantitative assessment, we used two semi-synthetic datasets
 where a typical fault has been injected into clean sensor data. We
 then analyzed qualitative performance on two real data sets with actual
 faults. All measurements are given in meters, with samples spaced in
-increments of approximately 30 minutes. The datasets are described below.
+increments of approximately 30 minutes. %The datasets are described below.
 
 %% We return to the water-level signal with the painting artifacts
 %% plotted in Figure \ref{hgriver}.  To test the method described above,
@@ -761,24 +760,21 @@ increments of approximately 30 minutes. The datasets are described below.
 %% fault-bucket model incorporates beyond ``faulty observations are
 %% unpredictable.''
 
-
-
 %\subsubsection{Synthetic bias fault}
-Our first synthetic example, a bias fault, concerns a simple sensor error where
-measurements are temporarily adjusted by a constant offset, but
-otherwise remain accurate. This could happen if the sensor undergoes
-physical trauma which results in a loss of calibration.
-
+Our first synthetic example, a bias fault, concerns a simple sensor
+error where measurements are temporarily adjusted by a constant
+offset, but otherwise remain accurate. This could happen if the sensor
+undergoes physical trauma which results in a loss of calibration.
 %\subsubsection{Synthetic anomaly}
-In the synthetic anomaly dataset, the water level rises quickly, but smoothly, before
-returning back to normal. This would be indicative of a genuine
-environmental event such as a flash flood.
-
+The next dataset contains a synthetic anomaly where the water level
+rises quickly, but smoothly, before returning back to normal. This
+would be indicative of a genuine environmental event such as a flash
+flood.
 %\subsubsection{Painting}
-Painting is an error that occurs when ice builds on a sensor obscuring
-some of the readings. It is characterized by frequent sensor spikes
-interlaced with the original, and still accurate, signal.
-
+The next dataset contains a fault type called ``painting,'' which is
+an error that occurs when ice builds on a sensor obscuring some of the
+readings. It is characterized by frequent sensor spikes interlaced
+with the original, and still accurate, signal.
 %\subsubsection{``Fishkiller''}
 Our final dataset, which we dub ``fishkiller'', comes from a sensor
 near a dam on a river in British Columbia, Canada. It contains an
@@ -804,7 +800,7 @@ $\sigma_n^2$ were learned using training data nearby but not included
 in the test datasets.  The unknown fault noise variance $\sigma_f^2$
 was marginalized using Bayesian Monte Carlo, with 7 samples in this
 parameter.  The prior probability of an observation being faulty was
-set to a constant value of 1\% throughout each test.
+set to a constant value of 1\% throughout.
 
 As a basis for comparison, we employed the widely used Kalman
 filter. We first trained the parameters on a set of clean data (the
