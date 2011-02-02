@@ -309,53 +309,54 @@ non-fault and fault cases.
 \end{align*}
 where $\fault \in \lbrace 0, 1 \rbrace$ is a binary indicator of
 whether the observation $z(x)$ was faulty and $\sigma_f > \sigma_n$ is
-the variance around the mean of faulty measurements.  The values of
-both $\sigma_n$ and $\sigma_f$ form hyperparameters of our model, and
-hence are included in $\theta$.
+the standard deviation around the mean of faulty measurements.  The
+values of both $\sigma_n$ and $\sigma_f$ form hyperparameters of our
+model and are therefore included in $\theta$.
 
-Of course, {\it a priori}, we do not know if any given observation
-will be faulty or not.  Unfortunately, managing our uncertainty about
-the faultiness of all available observations is a challenging task. If
-we have $N$ observations available, then there are $2^N$ possible
-combinations of faultiness. For even moderately sized datasets, it is
-computationally infeasible to correctly marginalise over the possible
-faultinesses of all observations.
+Of course, {\it a priori}, we do not know whether any given
+observation will be faulty.  Unfortunately, managing our uncertainty
+about the ``faultiness'' of all available observations is a
+challenging task. If we have $N$ observations available, then there
+are $2^N$ possible assignments of faultiness. For even moderately
+sized datasets, it is computationally infeasible to correctly
+marginalize over all these possible values.
 
 Instead, we propose a sequential approach, applicable for ordered data
-such as time series. For time series, the predictant $y\st$ typically
-lies in the future, such that our older observations are less
-pertinent than our newer observations. The intuition behind our
-approach is to, at any time step, `merge' the sum over the faultiness
-of the most recent observation. This gives rise to an approximation of
-our observation of unknown faultiness as an observation of known
-variance, lying between between $\sigma_n^2$ and $\sigma_f^2$. The
-more likely an observation's faultiness, the closer its assigned
-variance will be to the (large) fault variance, and the less relevant
-it will be for inference about the latent process. This approximate
-observation can then be used to compute future predictions; we need
-never consider the full sum over all observations. Nonetheless, this
-approximate marginalisation over faultiness is preferable to
-heuristics that would designate all observations as either faulty or
-not; our method acknowledges the uncertainty that may exist in
-faultiness.
+such as time series. For time series, the value to be predicted $y\st$
+typically lies in the future, and less-recent observations are
+typically less pertinent for this task than more-recent ones. The
+intuition behind our approach is to, at a given time step, ``merge''
+our current model with the uncertainty present in the inferred
+faultiness of the most recent observation. In effect, we represent
+each observation as having a known variance lying between between
+$\sigma_n^2$ and $\sigma_f^2$. The more likely an observation's
+faultiness, the closer its assigned variance will be to the (large)
+fault variance and the less relevant it will become for inference
+about the latent process. This approximate observation is then used
+for future predictions; we need never consider the full sum over all
+observations. Nonetheless, this approximate marginalization over
+faultiness is preferable to heuristics that would designate all
+observations as either faulty or not; our method acknowledges the
+uncertainty that may exist in our belief about faultiness.
 
 More formally, imagine that we have partitioned our observations
-$\data_{a,b}$ into a set of old observations $\data_a=(\vx_a,\vz_a)$
-and a set of newer observations $\data_b = (\vx_b,\vz_b)$. Define
-$\vs_{a}$ as the (unknown) vector of all noise variances at
-observations $\vz_{a}$, and similar for $\vs_{b}$. As we have to sum
-over all possible values for these vectors, we'll index the values of
+$\data_{a,b}$ into a set of old observations
+$\data_a\dex(\vx_a,\vz_a)$ and a set of newer observations $\data_b
+\dex (\vx_b,\vz_b)$. Define $\vs_{a}$ to be the (unknown) vector of
+all noise variances at observations $\vz_{a}$, and define $\vs_{b}$
+similarly. Because we have to sum over all possible values for these
+vectors, we will index the $2^{\lvert a \rvert}$ possible values of
 $\vs_{a}$ by $i$ (each given by a different combination of
-faultinesses over $\data_a$) and the values of $\vs_{b}$ by $j$. We
-now define the covariances
+faultinesses over $\data_a$) and the values of $\vs_{b}$ similarly by
+$j$. We now define the covariances
 \begin{align*}
- V_a^i & \defequal K_{a,a} + \diag \vs_{a}^i\,, \qquad
- V_b^j \defequal K_{a,a} + \diag \vs_{a}^i \\
- V_{a,b}^{i,j} & \defequal K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\}\,,
+ V_a^i & \defequal K_{a,a} + \diag \vs_{a}^i \\
+ V_b^j & \defequal K_{a,a} + \diag \vs_{a}^i \\
+ V_{a,b}^{i,j} & \defequal K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\},
 \end{align*}
 where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. 
 
-To initialise our algorithm, imagine that $a$ identifies a small set
+To initialize our algorithm, imagine that $a$ identifies a small set
 of data, such that we can readily compute
 \begin{equation}
  \hspace{-0.0cm}p(\vz_a)\!=\!\sum_i  \ps{\vz_a}{\vs^i_a}\fPr(\vs^i_a)
@@ -370,14 +371,14 @@ of data, such that we can readily compute
 This distribution also specifies the probability of our observations
 $\data_a$ being faulty; for a single observation $\data_a$,
 $
-\Prob{\fault(\data_a)}{\data_{a}} = \Prob{\sigma_a = \sigma_f}{\data_{a}}
+p\bigl(\fault(\data_a) \given \data_{a}\bigr) = \Prob{\sigma_a = \sigma_f}{\data_{a}}
 $.
 
 If we were to perform predictions for some $y\st$ using $\data_a$
-alone, we'd need to evaluate
+alone, we would need to evaluate
 \begin{align*}
 &\p{y\st}{\data_{a}} = \sum_{i} \Prob{\vs^i_{a}}{\data_a} \p{y\st}{\data_a, \vs^{i}_{a}}\nonumber\\
-&=\sum_{i} \Prob{\vs^i_{a}}{\data_a} \N{y\st}{\mean{y\st}{\data_a, \vs^{i}_{a}}}{\cov{y\st}{\data_a, \vs^{i}_{a}}}
+&=\sum_{i} \Prob{\vs^i_{a}}{\data_a} \cm{N}\bigl(y\st; \mean{y\st}{\data_a, \vs^{i}_{a}}, \cov{y\st}{\data_a, \vs^{i}_{a}}\bigr),
 \end{align*}
 the weighted sum of Gaussian predictions made using the different
 possible values for $\vs_{a}$.  Now, we'll perform the `merging' that
