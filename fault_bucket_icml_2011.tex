@@ -98,7 +98,7 @@ We consider the problem of inferring a signal $y\colon \R \to \R$ from
 noisy measurements of it.  Typical algorithms for this purpose often
 assume that the data is linear, i.i.d., Markovian, or Gaussian. In
 some cases, knowledge about the problem can enable the explicit
-specification of parameterized nonlinear models. This approach,
+specification of parametrized nonlinear models. This approach,
 however, is problematic for two reasons. First, estimating the model
 parameters is often difficult. More crucially, collected observations
 in real-world applications are often corrupted in non-trivial ways due
@@ -144,7 +144,7 @@ automation. Currently, the most important requirement of such systems
 is to provide the user with signals that he or she can use to reach a
 decision, making the uncertainty of predictions of the utmost
 importance. For this reason, we focus on developing \acro{gp}-based
-techniques to build probabilistic nonlinear models of the sgnal and thereby deliver reliable reports.  In addition to
+techniques to build probabilistic nonlinear models of the signal and thereby deliver reliable reports.  In addition to
 providing posterior probabilities of observation faultiness, we are
 able to perform effective prediction for the latent process even in
 the presence of faults.
@@ -657,7 +657,7 @@ observations are prone to faultiness in more than one mode.  Note that
 if, instead of summing over a small number of known variances, we
 wished to marginalize with respect to a density over noise variance,
 we can simply replace the sums over $i$ and $j$ with appropriate
-integrals. Obvously this will only be analytically possible if the
+integrals. Obviously this will only be analytically possible if the
 posteriors for $\sigma_a$ take appropriate, simple forms.  These
 extensions would allow our algorithm to tackle the general problem of
 heteroskedasticity.
@@ -692,7 +692,7 @@ contributions. Note that, using our full posteriors for faultiness, we can also 
   \vspace*{2\baselineskip}
   \psff{dynamics}
   \psff{kf_dynamics}
-  \caption{Mean and $\pm3\sigma$ standard-devation bounds for the
+  \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
     predictions of (first and third) the fault-bucket algorithm and
     (second and fourth) the Kalman filter algorithm on (top two) the
     synthetic bias dataset and (bottom two), the synthetic anomaly
@@ -707,7 +707,7 @@ contributions. Note that, using our full posteriors for faultiness, we can also 
 \hspace{-2.8cm}\psff{painting} \\
 %  \vspace{\baselineskip}
 \hspace{-2.8cm}\psff{fishkiller}
-  \caption{Mean and $\pm3\sigma$ standard-devation bounds for the
+  \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
     predictions of the fault-bucket algorithm on (top), the painting
     dataset and (bottom), the ``fishkiller'' dataset.  Detected faults are
     marked in black crosses, and the unobserved true values are marked
