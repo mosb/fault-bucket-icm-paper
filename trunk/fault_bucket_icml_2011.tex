@@ -424,9 +424,8 @@ $\tilde{V}_a$, we can then calculate
  \tilde{R}_a & \defequal \chol \tilde{V}_a \\%\label{eq:Ra}, \\
  \tilde{T}_a & \defequal \chol (\tilde{R}_a)^{-1} \vz_a %\label{eq:Ta},
 \end{align*}
-and use them, along with \eqref{eq:Wa}, to efficiently determine
+and use them, with \eqref{eq:Wa}, to determine
 \eqref{eq:ameana} and \eqref{eq:acova}.
-
 Now, with these calculations performed, we can imagine receiving
 further data $\data_b$. Our predictions are now
 \begin{align*}
@@ -478,13 +477,11 @@ p(\vz_{b} &\given \data_a)\nonumber\\
 & \simeq \sum_j \cm{N}\bigl(\vz_b; \amean{\vz_b}{\data_a}, \acov{\vz_b}{\data_a, \vs_b^j}\bigr) \fPr(\vs_b^j).\label{eq:likelihood_b}
 \end{align}
 Note that the product of \eqref{eq:likelihood_b} and
-\eqref{eq:likelihood_a} gives the likelihood of our hyperparameters.
-
-Now, returning to \eqref{eq:sum_o_Gaussians}, we will once again
+\eqref{eq:likelihood_a} gives the likelihood of our hyperparameters. Now, returning to \eqref{eq:sum_o_Gaussians}, we will once again
 approximate a sum of Gaussians as a moment-matched single
-Gaussian. Our goal here is to reuse our previously evaluated sums over
+Gaussian. We aim to reuse our previously evaluated sums over
 $i$ to resolve future sums over $i$. As we gain more data, the
-faultiness of very old data becomes less important. We arrive at
+faultiness of old data becomes less important. We arrive at
 \begin{align}
 \p{y\st}{\data_{a,b}} & \simeq \N{y\st}{\amean{y\st}{\data_{a,b}}}{\acov{y\st}{\data_{a,b}}}\,,\label{eq:pyab}
 \end{align}
@@ -495,9 +492,9 @@ where we have
 \acov{y\st}{\data_{a}}
 \defequal {} & K_{\star,\star} - K_{\star,a}(\tilde{V}_{a,b}^{-1}-\tilde{W}_{a,b}^{-1})K_{a,\star} {} \nonumber
 \\
-& - \amean{y\st}{\data_{a,b}}^2 \,.%\label{eq:acovab}
+& - \amean{y\st}{\data_{a,b}}^2 \,,%\label{eq:acovab}
 \end{align*}
-where
+\vspace{-0.8cm}
 \begin{align*}
 \tilde{V}^{-1}_{a,b} \defequal {} &
 \sum_{j} \Prob{\vs^j_{b}}{\data_{a,b}}\sum_i \Prob{\vs^i_{a}}{\data_{a}} (V_{a,b}^{i,j})^{-1} \\
@@ -519,9 +516,7 @@ Now, using the inversion by partitioning formula \citep[Section 2.7]
 where
 $
 S^{i,j}_a \defequal (V^i_a -K_{a,b} (V^j_b)^{-1}K_{b,a})^{-1}\,.
-$
-
-Note that $({V}^{i,j}_{a,b})^{-1}$ is affine in $S^{i,j}_a$, so that when
+$ Note that $({V}^{i,j}_{a,b})^{-1}$ is affine in $S^{i,j}_a$, so that when
 \begin{equation}\label{eq:V_a_big}
  V_a \gg K_{a,b} V_b^{-1} K_{b,a}\,,
 \end{equation}
@@ -869,7 +864,7 @@ We have proposed a novel algorithm, the ``fault bucket,'' for managing
 time-series data corrupted by faults unknown ahead of time. Our chief
 contribution is a sequential algorithm for marginalizing the
 faultiness of observations in a \acro{gp} framework, allowing for
-fast, effective prediction in the presence of unknwon faults and the
+fast, effective prediction in the presence of unknown faults and the
 simultaneous detection of faulty observations.
 
 \bibliography{fault_bucket_icml_2011}
