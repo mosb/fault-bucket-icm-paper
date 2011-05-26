@@ -260,9 +260,9 @@ them), and will return to them later.
 We propose an algorithm that is designed to deal with faults of many different, unspecified types. We use a sequential scheme, applicable for ordered data such as time series, partitioning the data available at any point into old and new halves.  We then approximately marginalise the faultinesses of old observations, storing and updated our results for future use. This gives rise to an efficient and fast algorithm. In order to effect our scheme, we make four key approximations.
 \begin{enumerate}
  \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance .
-\item \label{app:single_gaussian} {\bf Single Gaussian marginalisation:} Sums of Gaussians weighted by the posterior probabilities of faultiness of old data are approximated as single Gaussians.
+\item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} Sums of Gaussians weighted by the posterior probabilities of faultiness of old data are approximated as single moment-matched Gaussians.
 \item \label{app:independence} {\bf Old/new independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
-\item \label{app:affine} {\bf Precision affine:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
+\item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
 \end{enumerate}
 We will detail and justify these approximations further below.
 
