@@ -253,7 +253,7 @@ them), and will return to them later. Similarly, we drop the dependence of our p
 
 \section{Fault Bucket}\label{bucket}
 
-We propose an algorithm that is designed to deal with faults of many different, unspecified types. We use a sequential scheme, applicable for ordered data such as time series, partitioning the data available at any point into old and new halves.  We then approximately marginalise the faultinesses of old observations, storing and then updating our results for future use. This gives rise to an efficient and fast algorithm. In order to effect our scheme, we make four key approximations:
+We propose an algorithm that is designed to deal with faults of many different, unspecified types. We use a sequential scheme, applicable for ordered data such as time series, partitioning the data available at any point into old and new halves.  We then approximately marginalise the faultiness of old observations, storing and then updating our results for future use. This gives rise to an efficient and fast algorithm. In order to effect our scheme, we make four key approximations:
 \begin{enumerate}
  \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance .
 \item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
@@ -438,9 +438,9 @@ Note that the product of $p(\vy_{b} \given \vy_a)$ and $p(\vy_a)$ (previously co
 use Approximation \ref{app:single_gaussian}. We aim to reuse our previously evaluated sums over
 $i$ to resolve future sums over $i$. As we gain more data, the
 faultiness of old data becomes less important. We arrive at
-\begin{align}
-\p{f\st}{\vy_{a,b}} & \simeq \N{f\st}{K_{\star,a,b} \tilde{V}_{a,b}^{-1} \vy_{a,b}}{K_{\star,\star} - K_{\star,a}(\tilde{V}_{a,b}^{-1}-\tilde{W}_{a,b}^{-1})K_{a,\star} - \amean{f\st}{\vy_{a,b}}^2}\,,\label{eq:pyab}
-\end{align}
+\begin{align*}
+\p{f\st}{\vy_{a,b}} & \simeq \N{f\st}{K_{\star,\{a,b\}} \tilde{V}_{a,b}^{-1} \vy_{a,b}}{K_{\star,\star} - K_{\star,a}(\tilde{V}_{a,b}^{-1}-\tilde{W}_{a,b}^{-1})K_{a,\star} - (K_{\star,\{a,b\}} \tilde{V}_{a,b}^{-1} \vy_{a,b})^2}\,,%\label{eq:pyab}
+\end{align*}
 where we have
 \begin{align*}
 % \amean{f\st}{\vy_{a,b}} \defequal {}&  %\label{eq:ameanab}
@@ -481,19 +481,16 @@ recent observation), or if $\data_b$ and $\data_a$ are simply not
 particularly well correlated. On this basis, we make Approximation \ref{app:affine}. Additionally noting that $\sum_i \Prob{\vs^i_{a}}{\vy_{a}} = 1$, we have
 \footnote{
 $\tilde{V}^{-1}_{b|a}$ can be computed using the same trick as in \eqref{eq:inverse_trick} if
-$b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\tilde{V}_{a,b}$ required to solve the linear equations for our predictions \eqref{eq:pyab} can be efficiently determined \citep[Appendix
+$b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\tilde{V}_{a,b}$ required to solve the linear equations for our predictions can be efficiently determined \citep[Appendix
   B]{osbornebayesian} using the previously evaluated Cholesky factor of $\tilde{V}_{a}$.
 }
 \begin{align*}
-\tilde{V}^{-1}_{a,b} &\simeq \sum_j \Prob{\vs^j_{b}}{\vy_{a,b}} (\hat{V}^{j}_{a,b})^{-1},
-\nonumber\\
-\hat{V}^{j}_{a,b} & \defequal
-\begin{bmatrix}
+\tilde{V}^{-1}_{a,b} &\simeq \sum_j \Prob{\vs^j_{b}}{\vy_{a,b}} \begin{bmatrix}
  \tilde{V}_a & K_{a,b}
 \\
  K_{b,a} & V^j_b
-\end{bmatrix},
-\\
+\end{bmatrix}^{-1},
+\nonumber\\
 \tilde{V}_{a,b} & \simeq
 \begin{bmatrix}
  \tilde{V}_a & K_{a,b}\\
@@ -538,7 +535,15 @@ $
 then the approximation is valid. With this,
 \begin{align*}
 \tilde{W}^{-1}_{a,b} \simeq
-& \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}} (\hat{V}_{a,b}^{j})^{-1}\vy_{a,b}^{\phantom{\tr}} \vy_{a,b}^\tr (\hat{V}_{a,b}^{i,j})^{-1}\,.%\label{eq:Wab}
+& \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}} \begin{bmatrix}
+ \tilde{V}_a & K_{a,b}
+\\
+ K_{b,a} & V^j_b
+\end{bmatrix}^{-1}\vy_{a,b}^{\phantom{\tr}}\, \vy_{a,b}^\tr \begin{bmatrix}
+ \tilde{V}_a & K_{a,b}
+\\
+ K_{b,a} & V^j_b
+\end{bmatrix}^{-1}\,.%\label{eq:Wab}
 \end{align*}
 If we now receive further data $\data_c$, our existing data is simply treated as old data ($a \leftarrow \{a,b\}$, $b \leftarrow c$), and another iteration of our algorithm performed.
 % and we can solve for
@@ -713,21 +718,17 @@ rises quickly, but smoothly, before returning back to normal. This
 would be indicative of a genuine environmental event such as a flash
 flood.
 %\subsubsection{Painting}
-The next dataset contains a fault type called ``painting,'' which is
+The next (real) dataset contains a fault type called ``painting,'' which is
 an error that occurs when ice builds on a sensor obscuring some of the
 readings. It is characterised by frequent sensor spikes interlaced
 with the original, and still accurate, signal.
 %\subsubsection{``Fishkiller''}
-Our final dataset, which we dub ``fishkiller'', comes from a sensor
+Our final (real) dataset, which we dub ``fishkiller'', comes from a sensor
 near a dam on a river in British Columbia, Canada. It contains an
 otherwise normal water level-reading that is occasionally interrupted
 by a short period of rapid oscillation. This occurs when dam operators
-open and close the floodgates too quickly. When this happens, the
-water level on the other side of the dam experiences a rapid drop
-during which time salmon can become trapped on the shores and
-stranded, leading to suffocation. Detecting these events is critical
-to proper regulation of dams in order to preserve the lives of these
-fish.
+open and close the floodgates too quickly, leading to rapid water level drops followed by salmon becoming stranded and suffocating. Detecting these events is critical
+to proper regulation of dams.
 
 %\subsection{Implementation}
 
@@ -754,7 +755,7 @@ where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\
 %\begin{description}
 %\item[ XGP] 
 {\bf XGP:}
-A  \acro{gp} in which we exhaustively search over the faultiness of the last 5 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^4$ times more), but offers a useful way to quantify the influence of our approximations.
+A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of Approximations \ref{app:single_gaussian}-\ref{app:affine}.
 
 % \item[ TGP] 
 {\bf TGP:}
@@ -802,7 +803,7 @@ datasets.
 % The performance is remarkably better under mean-squared
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
-detection rates for the faulty points is generally excellent. The results reveal that our approximations do not result in significant loss of performance compared to exhaustive search.
+detection rates for the faulty points is generally excellent. The results reveal that Approximations \ref{app:single_gaussian}-\ref{app:affine} do not result in significant loss of performance compared to exhaustive search.
 
 \begin{table}
   \centering
@@ -821,11 +822,11 @@ detection rates for the faulty points is generally excellent. The results reveal
     Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
 & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
 \midrule
-    \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & 0.829 & \textbf{0.016} \\
-    \scshape{xgp} & 0.041 & \textbf{406} & 0.835 & \textbf{0.014} & \textbf{0.024} & $\mathbf{-1.15 \times 10^3}$ & \textbf{0.982} & 0.022 \\
-    \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & 0.829 & 0.083 \\
+    \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & \textbf{0.829} & {0.016} \\
+    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & \textbf{0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & \textbf{0.012} \\
+    \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & \textbf{0.829} & 0.083 \\
 %    \scshape{argp} & 2.340 & $-1.93 \times 10^9$ & 0.6 & 0.4 & 1.097 & $-7.52\times 10^8$ & 0.178 & 0.822 \\
-    \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.0446 & 0.262 \\
+    \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.045 & 0.262 \\
 %    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 & 0.360 & $-3.54 \times 10^4$ & 0.835 & 0.046 \\
    \scshape{ekf} & 0.060 & $-1.26 \times 10^4$ & 0.551 & 0.258 & 0.613 & $-1.81\times 10^4$ & 0.169 & 0.768 \\
     \bottomrule
