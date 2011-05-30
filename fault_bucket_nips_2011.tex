@@ -24,7 +24,7 @@
 
 \newcommand{\psff}[1]{\input{#1.tex}\includegraphics{#1.eps}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
-\newcommand{\deq}{\ensuremath{\triangleq}}
+\newcommand{\deq}{=}
 \newcommand{\given}{\!\ensuremath{\mid}\!}
 \newcommand{\cm}[1]{\ensuremath{\mathcal{#1}}}
 \newcommand{\bm}[1]{\ensuremath{\mathbf{#1}}}
@@ -50,7 +50,6 @@
 \newcommand{\N}[3]{\cm{N}( #1;#2,#3 )}
 \newcommand{\st}{_{\star}}
 \newcommand{\tr}{\ensuremath{\mathsf{T}}}
-\newcommand{\defequal}{=}
 
 \DeclareMathOperator{\fault}{fault}
 \DeclareMathOperator{\diag}{diag}
@@ -113,7 +112,7 @@ Many applications require inference about a signal, given only observations affl
 \citep{wagner2006guidelines}. Here measurements are often corrupted in non-trivial ways by various intermittent faulty sensing mechanisms, giving rise to outliers, missing data, drift and exogenous disturbances. Further, signals are not well-modelled by simple parametric approaches, such as linear or Markovian models. Despite the enormous importance of
 such monitoring, appropriate machine learning techniques are yet to be deployed for this purpose. In particular, there is a clear need for flexible algorithms, able to cope with signals and faults of many different types without placing a significant model-building burden upon users. Such algorithms must also be able to run reliably in real-time on incoming data.
 
-Our proposed method will rely on Gaussian processes (\acro{gp}s). GPs have been used previously for fault detection in \citep{Eciolaza2001}, but in a very different context, inapplicable for our problem. Previous work along similar lines has
+Our proposed method will rely on Gaussian processes (\acro{gp}s). GPs have been used previously for fault detection in \citep{Eciolaza2001}, but in a very different context, unsuitable for our problem. Previous work along similar lines has
 approached this problem by creating observation models that specify
 the anticipated potential fault types \textit{a priori}
 \citep{garnettosborne}, but this is usually an unreasonable assumption
@@ -245,7 +244,7 @@ where the posterior mean and covariance are
 We now make some definitions for the sake of readability. Henceforth,
 we assume that our observations $\vy$ have already been scaled by the
 subtraction of the prior mean $\mu(\bm{x}; \theta)$. We will also make
-use of the covariance matrix shorthand $K_{m,n} \defequal
+use of the covariance matrix shorthand $K_{m,n} \deq
 K(\vx_m,\vx_n)$. Finally, for now, we'll drop the explicit dependence
 of our probabilities on the hyperparameters $\theta$ (it will be
 implicitly assumed that all quantities are conditioned on knowledge of
@@ -255,7 +254,7 @@ them), and will return to them later. Similarly, we drop the dependence of our p
 
 We propose an algorithm that is designed to deal with faults of many different, unspecified types. We use a sequential scheme, applicable for ordered data such as time series, partitioning the data available at any point into old and new halves.  We then approximately marginalise the faultiness of old observations, storing and then updating our results for future use. This gives rise to an efficient and fast algorithm. In order to effect our scheme, we make four key approximations:
 \begin{enumerate}
- \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance .
+ \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance.
 \item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
 \item \label{app:independence} {\bf Old/new independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
 \item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
@@ -311,12 +310,12 @@ all noise variances at observations $\vy_{a}$, and define $\vs_{b}$
 similarly. Because we have to sum over all possible values for these
 vectors, we will index the possible values of
 $\vs_{a}$ by $i$ (each given by a different combination of
-faultinesses over $\data_a$) and the values of $\vs_{b}$ similarly by
+faultiness over $\data_a$) and the values of $\vs_{b}$ similarly by
 $j$. We now define the covariances
 %\begin{align*}
- $V_a^i  \defequal K_{a,a} + \diag \vs_{a}^i$,
- $V_b^j  \defequal K_{b,b} + \diag \vs_{b}^j$ and
- $V_{a,b}^{i,j} \defequal K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\}$,
+ $V_a^i  \deq K_{a,a} + \diag \vs_{a}^i$,
+ $V_b^j  \deq K_{b,b} + \diag \vs_{b}^j$ and
+ $V_{a,b}^{i,j} \deq K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\}$,
 %\end{align*}
 where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. 
 
@@ -356,9 +355,9 @@ predictions really will not be very sensitive to $\sigma_a$. So, we take
 \end{align*}
 % where we have
 % \begin{align}
-% \amean{f\st}{\vy_{a}} \defequal {}& K_{\star,a} \tilde{V}_a^{-1} \vy_a,\label{eq:ameana}\\
+% \amean{f\st}{\vy_{a}} \deq {}& K_{\star,a} \tilde{V}_a^{-1} \vy_a,\label{eq:ameana}\\
 % \acov{f\st}{\vy_{a}}
-% \defequal {}& K_{\star,\star} - K_{\star,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,\star} 
+% \deq {}& K_{\star,\star} - K_{\star,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,\star} 
 %  - \amean{f\st}{\vy_{a,b}}^2 ,\label{eq:acova}
 % \end{align}
 where\footnote{
@@ -378,14 +377,14 @@ or not),
 If $i$ takes more than two values, we can simply iterate using the
 same technique. We can then use the Cholesky factor of $\tilde{V}_a$ to compute our required equations.}
 \begin{align}
- \tilde{V}_a^{-1}  & \defequal \sum_i \Prob{\vs^i_{a}}{\vy_a} (V_a^i)^{-1},\nonumber\\
- \tilde{W}_a^{-1} & \defequal \sum_i \Prob{\vs^i_{a}}{\vy_a} (V_a^i)^{-1}\vy_a \vy_a^\tr (V_a^i)^{-1}.\label{eq:Wa}
+ \tilde{V}_a^{-1}  & \deq \sum_i \Prob{\vs^i_{a}}{\vy_a} (V_a^i)^{-1},\nonumber\\
+ \tilde{W}_a^{-1} & \deq \sum_i \Prob{\vs^i_{a}}{\vy_a} (V_a^i)^{-1}\vy_a \vy_a^\tr (V_a^i)^{-1}.\label{eq:Wa}
 \end{align}
 % Having computed
 % $\tilde{V}_a$, we can then calculate
 % \begin{align} %labelled only for alg statement
-%  \tilde{R}_a & \defequal \chol \tilde{V}_a \\%\label{eq:Ra}, \\ 
-%  \tilde{T}_a & \defequal \chol (\tilde{R}_a)^{-1} \vy_a %\label{eq:Ta},
+%  \tilde{R}_a & \deq \chol \tilde{V}_a \\%\label{eq:Ra}, \\ 
+%  \tilde{T}_a & \deq \chol (\tilde{R}_a)^{-1} \vy_a %\label{eq:Ta},
 % \end{align}
 % and use them, with \eqref{eq:Wa}, to determine
 % \eqref{eq:ameana} and \eqref{eq:acova}.
@@ -411,11 +410,11 @@ only a single observation $\data_b$, $
 p\bigl(\fault(\data_b) \given \vy_{a,b}\bigr) = \Prob{\sigma_b =
   \sigma_f}{\vy_{a,b}} $. We define
 \begin{align*}%labelled only for alg statement
-\amean{\vy_b}{\vy_a} \defequal {} &
+\amean{\vy_b}{\vy_a} \deq {} &
 K_{b,a} \tilde{V}_a^{-1} \vy_a %\label{eq;ameanba}
 \\
 \acov{\vy_b}{\vy_{a},\vs_b}
-\defequal {} & V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b}
+\deq {} & V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b}
  - \amean{\vy_b}{\vy_{a,b}}^2, %\label{eq;acovba}
 \end{align*}
 where both $\tilde{V}_a$ (or its Cholesky factor) and
@@ -443,16 +442,16 @@ faultiness of old data becomes less important. We arrive at
 \end{align*}
 where we have
 \begin{align*}
-% \amean{f\st}{\vy_{a,b}} \defequal {}&  %\label{eq:ameanab}
+% \amean{f\st}{\vy_{a,b}} \deq {}&  %\label{eq:ameanab}
 % \\
 % \acov{f\st}{\vy_{a}}
-% \defequal {} &  \\%\label{eq:acovab}
+% \deq {} &  \\%\label{eq:acovab}
 % % \end{align*}
 % % \vspace{-0.8cm}
 % % \begin{align*}
-\tilde{V}^{-1}_{a,b} \defequal {} &
+\tilde{V}^{-1}_{a,b} \deq {} &
 \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_i \Prob{\vs^i_{a}}{\vy_{a}} (V_{a,b}^{i,j})^{-1} \\
-\tilde{W}^{-1}_{a,b} \defequal {} &
+\tilde{W}^{-1}_{a,b} \deq {} &
 \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_i \Prob{\vs^i_{a}}{\vy_{a}} (V_{a,b}^{i,j})^{-1}  
  \vy_{a,b}^{\phantom{\tr}} \vy_{a,b}^\tr (V_{a,b}^{i,j})^{-1}.
 \end{align*}
@@ -467,7 +466,7 @@ Now, using the inversion by partitioning formula \citep[Section 2.7]
 \end{align*}
 where
 $
-S^{i,j}_a \defequal (V^i_a -K_{a,b} (V^j_b)^{-1}K_{b,a})^{-1}\,.
+S^{i,j}_a \deq (V^i_a -K_{a,b} (V^j_b)^{-1}K_{b,a})^{-1}\,.
 $ Note that $({V}^{i,j}_{a,b})^{-1}$ is affine in $S^{i,j}_a$, so that when $V_a \gg K_{a,b} V_b^{-1} K_{b,a}$,
 % \begin{equation}\label{eq:V_a_big}
 %  V_a \gg K_{a,b} V_b^{-1} K_{b,a}\,,
@@ -504,7 +503,7 @@ $b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\
 % 
 % where
 % \begin{equation*}
- \tilde{V}^{-1}_{b|a} & \defequal \sum_j \Prob{\vs^j_{b}}{\vy_{a,b}} (V^j_b -K_{b,a} \tilde{V}_a^{-1}K_{a,b})^{-1}\,.
+ \tilde{V}^{-1}_{b|a} & \deq \sum_j \Prob{\vs^j_{b}}{\vy_{a,b}} (V^j_b -K_{b,a} \tilde{V}_a^{-1}K_{a,b})^{-1}\,.
 \end{align*}
  Note that the
 lower right hand element of $\tilde{V}_{a,b}$ defines the noise
@@ -616,7 +615,9 @@ heteroskedasticity.
 
 
 Our proposed algorithm steps through our data one at a time, so that
-$\data_b$ always contains only a single observation. With Approximation \ref{app:independence}, this means that our algorithm is not expecting faults to last more than a single observation. The results that follow, however, will show that we can nonetheless manage sustained faults. It would also
+$\data_b$ always contains only a single observation. 
+With Approximation \ref{app:independence}, this means that our algorithm is not expecting faults to last more than a single observation. The results that follow, however, will show that we can nonetheless manage sustained faults. 
+It would also
 be possible to step in larger chunks, evaluating larger
 sums. Although more computationally demanding, this might be expected
 to improve results. It would also allow us to consider non-diagonal
@@ -627,8 +628,7 @@ $p(\sigma_a)$ and $p(\sigma_b)$). Within this paper, we consider
 exclusively a time-independent probability of faultiness, but our framework does not necessarily require this to be so.
 
 In some contexts it might be useful to perform inference about the
-fault contribution, rather than the signal of interest.  This task is
-trivial; we merely switch the roles of the fault and non-fault
+fault contribution, rather than the signal of interest.  To do so, we merely switch the roles of the fault and non-fault
 contributions. Note that, using our full posteriors for faultiness, we
 can also trivially use Bayesian decision theory to make hard decisions
 as required.
@@ -740,7 +740,7 @@ zero prior mean function was appropriate, and the functions were all
 modeled using a Mat\'{e}rn covariance with parameter $\nu =
 \nicefrac{5}{2}$ \citep{gpml}.  The hyperparameters for this
 covariance, including the normal observation noise variance
-$\sigma_n^2$ were learned using training data nearby but not included
+$\sigma_n^2$, were learned using training data nearby but not included
 in the test datasets.  The unknown fault noise variance $\sigma_f^2$
 was marginalised using Bayesian Monte Carlo, with 7 samples in this
 parameter.  The prior probability of an observation being faulty was
