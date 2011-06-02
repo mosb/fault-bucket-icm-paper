@@ -273,7 +273,7 @@ Exact measurements of the latent function are typically not available.
 %  we may combine the Gaussian process distribution on the
 % latent function with an observation model that takes into account
 % potential noise in our measurements.  
-Let $f(x)$ represent the
+Let $y(x)$ represent the
 value of an observation of the signal at $x$ and $f(x)$
 represent the value of the unknown true latent signal at that point.
 When the observation mechanism is not expected to experience faults,
@@ -899,7 +899,7 @@ An autoregressive neural net trained with the extended Kalman filter to capture 
 
 %\subsection{Results}
 Figures \ref{justfb} show the performance of the
-fault-bucket algorithm and the exhuastive alternative on the two real datasets. The fault-bucket algorithm did an excellent
+fault-bucket algorithm and the exhaustive alternative on the two real datasets. The fault-bucket algorithm did an excellent
 job of identifying faults when they occur, and made excellent
 predictions, even for the sustained fault in the pH dataset. 
 
@@ -923,7 +923,7 @@ detection rates for the faulty points is generally excellent. The results reveal
   \label{tbl:results}
   \begin{tabular}{ccccccccc}
     \toprule
-& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{`Flash-flood' dataset}\\
+& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{``Flash-flood'' dataset}\\
     \cmidrule(l){2-5} \cmidrule(l){6-9}
     Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
 & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
