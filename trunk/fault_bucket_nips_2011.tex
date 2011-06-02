@@ -128,7 +128,8 @@ begins with proper water monitoring, which requires the analysis and
 interpretation of vast amounts of environmental data
 \citep{wagner2006guidelines}. To accomplish this, we need to design
 techniques for detecting patterns and making predictions with
-challenging datasets, fraught with missing data, discontinuities and
+challenging datasets, fraught with 
+%missing data, discontinuities and
 \textit{a priori} unknown types of nonlinearity and non-stationarity.
 These techniques will enable us to provide operators with high-level
 summaries for better decision support and, in the future, to increase
@@ -140,8 +141,7 @@ and prediction in water monitoring signals.
 Here measurements are often corrupted in non-trivial ways by various
 intermittent faulty sensing and communication mechanisms, giving rise
 to outliers, telemetry spikes, missing data, drift and multiple
-unanticipated exogenous disturbances.
-%(see Figure~\ref{fig:monitoring}).
+unanticipated exogenous disturbances (see Figure~\ref{fig:monitoring}).
 Further, signals are not well-modelled by simple parametric
 approaches, such as linear or Markovian models. Despite the enormous
 importance of
@@ -151,17 +151,24 @@ flexible algorithms, able to cope with signals and faults of many
 different types without placing a significant model-building burden
 upon users. Such algorithms must also be able to run reliably in
 real-time on incoming data.
-% \begin{figure*}
-% \begin{center}
-% %\includegraphics[height=.5\textwidth]{waterMonitoring.pdf}
-% \end{center}
-% \caption{{\small \it The water sustainability challenge. The
-% encountered time series are highly nonstationary, with varying
-% length-scales, cycles, drift, offsets, spikes, missing observations,
-% and many unanticipated anomalies. STATE THAT FOR FISHKILLER, WE'RE
-% INTERESTED IN PATTERN.}}
-% \label{fig:monitoring}
-% \end{figure*}
+\begin{figure*}[t!]
+\begin{center}
+ \includegraphics[width=\textwidth]{watermonitoring.eps}
+\end{center}
+\caption{16 months worth of data from 6 representative
+signals in water quality monitoring,
+which corresponds to approximately 11,000 measurements per series.
+These signals are highly nonlinear, demonstrating periodicity at
+different scales,
+intermittent pulses, and changes in dynamics. Not only do these
+signals exhibit a wide range of dynamics,
+but different signals of the same measurement type can also differ
+drastically if they are taken in different regions.
+Moreover, these signals are often dependent on unobserved exogenous
+variables such as rainfall, which further complicates
+prediction.}
+\label{fig:monitoring}
+\end{figure*}
 
 
 The collection of literature on fault (also known as novelty, anomaly
@@ -384,7 +391,7 @@ about the faultiness of all available observations is a
 challenging task. With $N$ observations, there are $2^N$
 possible assignments of faultiness; it is infeasible to consider them all.
 
-Our solution is founded upon Approximation \ref{app:single_gaussian}. 
+Our solution is founded upon approximation \ref{app:single_gaussian}. 
 For time series, the value to be predicted $f\st$
 typically lies in the future, and old observations are
 typically less pertinent for this task than new ones. We hence approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian.
@@ -434,7 +441,7 @@ alone, we would need to evaluate
 =\sum_{i} \Prob{\vs^i_{a}}{\vy_a} \cm{N}\bigl(f\st; \mean{f\st}{\vy_a, \vs^{i}_{a}}, \cov{f\st}{\vy_a, \vs^{i}_{a}}\bigr),
 \end{equation*}
 the weighted sum of Gaussian predictions made using the different
-possible values for $\vs_{a}$.  We now use Approximation \ref{app:single_gaussian}. It is our hope that our predictions
+possible values for $\vs_{a}$.  We now use approximation \ref{app:single_gaussian}. It is our hope that our predictions
 for $f\st$ are not so sensitive to the noise in our observations that
 all the Gaussians in this sum become dramatically different. In any
 case, the quality of this approximation will improve over time---if
@@ -480,7 +487,7 @@ same technique. We can then use the Cholesky factor of $\tilde{V}_a$ to compute 
 % and use them, with \eqref{eq:Wa}, to determine
 % \eqref{eq:ameana} and \eqref{eq:acova}.
 With these calculations performed, imagine receiving
-further data $\data_b$. To progress, we make Approximation \ref{app:independence}; we assume that faults will not persist longer than $|\data_b|$. To be precise, we assume
+further data $\data_b$. To progress, we make approximation \ref{app:independence}; we assume that faults will not persist longer than $|\data_b|$. To be precise, we assume
 \begin{align} \label{eq:approx}
 p(\vs^{i,j}_{a,b},\vy_{a,b}) & \simeq p(\vy_a)\,\Prob{\vs^i_{a}}{\vy_a}\,
 %P
@@ -510,7 +517,7 @@ K_{b,a} \tilde{V}_a^{-1} \vy_a %\label{eq;ameanba}
 \end{align*}
 where both $\tilde{V}_a$ (or its Cholesky factor) and
 $\tilde{W}_a^{-1}$ were computed previously. By using
-Approximations \ref{app:single_gaussian} and \ref{app:independence},
+approximations \ref{app:single_gaussian} and \ref{app:independence},
 \begin{align*}
 \Prob{\vs_b}{\vy_{a,b}} & = \frac{\sum_i \p{\vy_b}{\vy_a,\vs^i_{a,b}}p(\vy_a,\vs^i_{a,b})}{p(\vy_{a,b})} 
 % \simeq \frac{\sum_i \p{\vy_b}{\vy_a,\vs^i_{a,b}}\fPr(\vs_a^i\mid{\vy_a})\fPr(\vs_{b})}{\ps{\vy_{b}}{\vy_a}}
@@ -525,7 +532,7 @@ p(\vy_{b} \given \vy_a)
 \end{align*}
 Note that the product of $p(\vy_{b} \given \vy_a)$ and $p(\vy_a)$ (previously computed in
 \eqref{eq:likelihood_a}) gives the likelihood of our hyperparameters. Now, returning to \eqref{eq:sum_o_Gaussians}, we will once again
-use Approximation \ref{app:single_gaussian}. We aim to reuse our previously evaluated sums over
+use approximation \ref{app:single_gaussian}. We aim to reuse our previously evaluated sums over
 $i$ to resolve future sums over $i$. As we gain more data, the
 faultiness of old data becomes less important. We arrive at
 \begin{align*}
@@ -568,7 +575,7 @@ $\data_a$. This might be the case if $\data_a$ represents a lot of
 information relative to $\data_b$ (if, for example, $\data_a$ is our
 entire history of observations where $\data_b$ is simply the most
 recent observation), or if $\data_b$ and $\data_a$ are simply not
-particularly well correlated. On this basis, we make Approximation \ref{app:affine}. Additionally noting that $\sum_i \Prob{\vs^i_{a}}{\vy_{a}} = 1$, we have
+particularly well correlated. On this basis, we make approximation \ref{app:affine}. Additionally noting that $\sum_i \Prob{\vs^i_{a}}{\vy_{a}} = 1$, we have
 \footnote{
 $\tilde{V}^{-1}_{b|a}$ can be computed using the same trick as in \eqref{eq:inverse_trick} if
 $b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\tilde{V}_{a,b}$ required to solve the linear equations for our predictions can be efficiently determined \citep[Appendix
@@ -609,7 +616,7 @@ observations.
 
 We now turn to $\tilde{W}_{a,b}^{-1}$. Unfortunately, even if
 $V_a \gg K_{a,b} V_b^{-1} K_{b,a}$, $\tilde{W}_{a,b}^{-1}$ is quadratic in
-$(V^i_a)^{-1}$. We will nonetheless again make Approximation \ref{app:affine} and assume that $\tilde{W}_{a,b}^{-1}$
+$(V^i_a)^{-1}$. We will nonetheless again make approximation \ref{app:affine} and assume that $\tilde{W}_{a,b}^{-1}$
 is affine in $(V^i_a)^{-1}$. The quality of our approximation for
 $\tilde{W}_{a,b}^{-1}$ is much less critical than for
 $\tilde{V}^{-1}_{a,b}$, because the former only influences the
@@ -707,7 +714,7 @@ heteroskedasticity.
 
 Our proposed algorithm steps through our data one at a time, so that
 $\data_b$ always contains only a single observation. 
-With Approximation \ref{app:independence}, this means that our algorithm is not expecting faults to last more than a single observation. The results that follow, however, will show that we can nonetheless manage sustained faults. 
+With approximation \ref{app:independence}, this means that our algorithm is not expecting faults to last more than a single observation. The results that follow, however, will show that we can nonetheless manage sustained faults. 
 It would also
 be possible to step in larger chunks, evaluating larger
 sums. Although more computationally demanding, this might be expected
@@ -827,7 +834,7 @@ rises quickly, but smoothly, before returning back to normal. This
 would be indicative of a genuine environmental event such as a flash
 flood.
 %\subsubsection{pH}
-Our next (real) dataset deals with pH measurements from the United States Geological Survey, a common indicator of water quality. In this series, a clear sensor fault can be seen
+Our first real dataset deals with pH measurements from the United States Geological Survey, a common indicator of water quality. In this series, a clear sensor fault can be seen
 in which the observation undergo a sudden decrease in value.
 %\subsubsection{Painting}
 The next (real) dataset contains a fault type called ``painting,'' which is
@@ -867,7 +874,7 @@ where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\
 %\begin{description}
 %\item[ XGP] 
 {\bf XGP:}
-A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of Approximations \ref{app:single_gaussian}-\ref{app:affine}.
+A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}-\ref{app:affine}.
 
 % \item[ TGP] 
 {\bf TGP:}
@@ -896,17 +903,10 @@ An autoregressive neural net trained with the extended Kalman filter to capture 
 
 
 %\subsection{Results}
-Figures \ref{compare} show the performance of the
-fault-bucket algorithm on two real datasets, as well as the
-performance of the exhaustive .  In all cases, the fault-bucket algorithm did an excellent
+Figures \ref{justfb} show the performance of the
+fault-bucket algorithm and the exhuastive alternative on the two real datasets. The fault-bucket algorithm did an excellent
 job of identifying faults when they occur, and made excellent
-predictions.  The faults in the synthetic bias, painting,
-and fishkiller datasets were identified almost perfectly, with a small
-number of false negatives in the latter two.  Most of the fault in the
-synthetic anomaly dataset was identified; however, the algorithm
-required a number of readings at the beginning of the smooth fault
-interval before it was able to conclude conclusively that the sharp
-rise was not part of the normal signal.
+predictions, even for the sustained fault in the pH dataset. 
 
 Table \ref{tbl:results} displays quantitative measures of performance
 for the various algorithms on the synthetic
@@ -914,7 +914,7 @@ datasets.
 % The performance is remarkably better under mean-squared
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
-detection rates for the faulty points is generally excellent. The results reveal that Approximations \ref{app:single_gaussian}-\ref{app:affine} do not result in significant loss of performance compared to exhaustive search.
+detection rates for the faulty points is generally excellent. The results reveal that approximations \ref{app:single_gaussian}-\ref{app:affine} do not result in significant loss of performance relative to exhaustive search.
 
 \begin{table}
   \centering
