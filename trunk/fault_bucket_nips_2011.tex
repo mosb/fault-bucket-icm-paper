@@ -1,7 +1,7 @@
 \documentclass{article} % For LaTeX2e
 \usepackage{nips11submit_e,times}
 
-\usepackage[letterpaper]{geometry}
+%\usepackage[letterpaper]{geometry}
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{algorithm}
@@ -742,30 +742,38 @@ as required.
 %   \label{compare}
 % \end{figure*}
 
+
 \begin{figure*}[t]
- \centering
- \small
- \begin{tabular}{cc}
-   \hspace*{2em} \textsc{xgp} -- ``fishkiller'' &
-   \hspace*{2em} \textsc{xgp} -- painting \\
-%\vspace{-0.5cm}
-   \psff{fk_exhaust} & \psff{painting_exhaust} \\
-   \hspace*{2em} \textsc{fb} -- ``fishkiller'' &
-   \hspace*{2em} \textsc{fb} -- painting \\
-   \psff{fk} & \psff{painting} \\
-   %\hspace*{1.2em} 
-\psff{fk_fault} &
-   %\hspace*{0.5em} 
-\psff{painting_fault}
- \end{tabular}
- \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
-   predictions of the exhaustive (\textsc{xgp}) and fault-bucket
-   (\textsc{fb}) algorithms on the ``fishkiller'' and painting
-   datasets.  For the fault-bucket algorithm, the posterior
-   faultiness of each observation is also shown underneath the
-   predictions.  Note that each column shares the same $x$-axis.}
- \label{justfb}
+  \centering
+  \small
+  \begin{tabular}{cc}
+    \hspace*{2em} \textsc{xgp} -- pH & 
+    \hspace*{2em} \textsc{xgp} -- painting
+    \vspace*{1ex}
+    \\
+    \psff{ph_exhaust} & \psff{painting_exhaust} \\
+    \\
+    \hspace*{2em} \textsc{fb} -- pH & 
+    \hspace*{2em} \textsc{fb} -- painting
+    \vspace*{1ex}
+    \\
+    \psff{ph} & \psff{painting} \\
+    \\
+    \hspace*{2em} \textsc{fb} --  $p(\text{fault}(t) \given \cm{D})$ & 
+    \hspace*{2em} \textsc{fb} --  $p(\text{fault}(t) \given \cm{D})$ 
+    \vspace*{1ex}
+    \\
+    \hspace*{-0.7em} \psff{ph_fault} & \psff{painting_fault} \\
+  \end{tabular}
+  \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
+    predictions of the exhaustive (\textsc{xgp}) and fault-bucket
+    (\textsc{fb}) algorithms on the pH and painting datasets.  For the
+    fault-bucket algorithm, the posterior faultiness of each
+    observation is also shown underneath the predictions.  Note that
+    each column shares the same $x$-axis.}
+  \label{justfb}
 \end{figure*}
+
 
 % Finally, some applications might required a hard decision about
 % whether a particular observation was faulty.  This would be necessary,
