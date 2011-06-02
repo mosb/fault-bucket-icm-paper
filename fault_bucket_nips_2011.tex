@@ -61,7 +61,7 @@
 \newcommand{\new}{\marginpar{NEW}}
 
 
-\title{A Machine Learning Method for Pattern Detection, Cleaning, and
+\title{A Machine-Learning Method for Pattern Detection, Cleaning, and
 Prediction of Environmental Data}
 
 %  \title{A ``Fault Bucket'' for Time-Series Prediction with
@@ -366,18 +366,18 @@ replace \eqref{iidnoise} that models the noise as independent
 but not identically distributed with separate variances for the
 non-fault and fault cases:
 \begin{align*}
- p(z \given y, x, \neg\fault, \sigma_n^2)
+ p(y \given f, x, \neg\fault, \sigma_n^2)
  &
  \deq
- \cm{N}(z; y, \sigma_n^2)
+ \cm{N}(y; f, \sigma_n^2)
  \\
- p(z \given y, x, \fault, \sigma_f^2)
+ p(y \given f, x, \fault, \sigma_f^2)
  &
  \deq
- \cm{N}(z; y, \sigma_f^2),
+ \cm{N}(y; f, \sigma_f^2),
 \end{align*}
 where $\fault \in \lbrace 0, 1 \rbrace$ is a binary indicator of
-whether the observation $z(x)$ was faulty and $\sigma_f > \sigma_n$ is
+whether the observation $y(x)$ was faulty and $\sigma_f > \sigma_n$ is
 the standard deviation around the mean of faulty measurements.  The
 values of both $\sigma_n$ and $\sigma_f$ form hyperparameters of our
 model and are hence included in $\theta$.
