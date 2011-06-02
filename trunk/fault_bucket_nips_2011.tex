@@ -31,7 +31,7 @@
 \newcommand{\bm}[1]{\ensuremath{\mathbf{#1}}}
 \newcommand{\data}{\ensuremath{\cm{D}}}
 \newcommand{\inv}{\ensuremath{^{-1}}}
-\newcommand{\acro}[1]{\textsc{#1}}
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
 
 % Mike's definitions
 \newcommand{\dd}[2]{\delta(#1-#2))}
@@ -61,7 +61,7 @@
 \newcommand{\new}{\marginpar{NEW}}
 
 
-\title{A Machine Learning Method for Pattern Detection, Cleaning and
+\title{A Machine Learning Method for Pattern Detection, Cleaning, and
 Prediction of Environmental Data}
 
 %  \title{A ``Fault Bucket'' for Time-Series Prediction with
@@ -105,42 +105,42 @@ Address \\
 }
 
 \begin{abstract}
-Many signals of interest are corrupted by faults of unknown type. We
-propose an approach that uses Gaussian processes and a general ``fault
-bucket'' to capture \textit{a priori} uncharacterised faults, along
-with an approximate method for marginalising the potential faultiness
-of all observations. This gives rise to an efficient, flexible
-algorithm for the detection and automatic correction of faults. Our
-method is deployed in the domain of water monitoring and management,
-where it is able to solve several fault detection, correction and
-prediction problems. The method works well despite the fact that the
-data is plagued with numerous difficulties, including missing
-observations, multiple discontinuities, non-stationarity, nonlinearity
-and many unanticipated types of fault.
+Many signals of interest are corrupted by faults of an unknown
+type. We propose an approach that uses Gaussian processes and a
+general ``fault bucket'' to capture \textit{a priori} uncharacterised
+faults, along with an approximate method for marginalising the
+potential faultiness of all observations. This gives rise to an
+efficient, flexible algorithm for the detection and automatic
+correction of faults. Our method is deployed in the domain of water
+monitoring and management, where it is able to solve several fault
+detection, correction, and prediction problems. The method works well
+despite the fact that the data is plagued with numerous difficulties,
+including missing observations, multiple discontinuities,
+non-stationarity, nonlinearity and many unanticipated types of fault.
 \end{abstract}
 
 \section{Introduction}
 
 Water sustainability is one of the greatest challenges that humankind
-faces. It is also a problem to which the machine learning community
+faces. It is also a problem to which the machine-learning community
 can make positive, significant contributions. Water sustainability
 begins with proper water monitoring, which requires the analysis and
 interpretation of vast amounts of environmental data
-\citep{wagner2006guidelines}. In this paper, we attack the problem of fault detection, correction
-and prediction in water monitoring signals.
-Here measurements are often corrupted in non-trivial ways by various
-intermittent faulty sensing and communication mechanisms, giving rise
-to outliers, telemetry spikes, missing data, drift and multiple
-unanticipated exogenous disturbances (see Figure~\ref{fig:monitoring}).
-Further, signals are not well-modelled by simple parametric
-approaches, such as linear or Markovian models. Despite the enormous
-importance of
-such monitoring, appropriate machine learning techniques are yet to be
-deployed for this purpose. In particular, there is a clear need for
-flexible algorithms, able to cope with signals and faults of many
-different types without placing a significant model-building burden
-upon users. Such algorithms must also be able to run reliably in
-real-time on incoming data. 
+\citep{wagner2006guidelines}. In this paper, we attack the problem of
+fault detection, correction, and prediction in water monitoring
+signals.  Here measurements are often corrupted in non-trivial ways by
+various intermittent faulty sensing and communication mechanisms,
+giving rise to outliers, telemetry spikes, missing data, drift, and
+multiple unanticipated exogenous disturbances (see
+Figure~\ref{fig:monitoring}).  Further, signals are not well-modelled
+by simple parametric approaches, such as linear or Markovian
+models. Despite the enormous importance of such monitoring,
+appropriate machine-learning techniques are yet to be deployed for
+this purpose. In particular, there is a clear need for flexible
+algorithms, able to cope with signals and faults of many different
+types without placing a significant model-building burden upon
+users. Such algorithms must also be able to run reliably in real-time
+on incoming data.
 % To accomplish this, we need to design
 % techniques for detecting patterns and making predictions with
 % challenging datasets, fraught with 
@@ -148,15 +148,15 @@ real-time on incoming data.
 % \textit{a priori} unknown types of nonlinearity and non-stationarity.
 These techniques will enable us to provide operators with high-level
 summaries for better decision support and, in the future, to increase
-the level of automation and efficiency in water management systems.
+the level of automation and efficiency in water-management systems.
 
 \begin{figure*}[t!]
 \begin{center}
  \includegraphics[width=\textwidth, height=5cm]{watermonitoring.eps}
 \end{center}
-\caption{16 months worth of data from 6 representative
+\caption{16 months worth of data from six representative
 signals in water quality monitoring,
-which corresponds to approximately 11,000 measurements per series.
+which corresponds to approximately 11\,000 measurements per series.
 These signals are highly nonlinear, demonstrating periodicity at
 different scales,
 intermittent pulses, and changes in dynamics. Not only do these
@@ -170,8 +170,8 @@ prediction.}
 \end{figure*}
 
 
-The collection of literature on fault (also known as novelty, anomaly
-and one-class) detection is vast
+The collection of literature on fault- (also known as novelty-, anomaly-
+and one-class-) detection is vast
 \cite{Eciolaza2001, deFreitas1996,
  Isermann2005, Ding2008,Markou2003,Chandola:2009,Khan2010,Dereszynski}.
 Unfortunately, the problems solved by most of these techniques are of
@@ -181,7 +181,7 @@ much experimentation with those methods that are applicable (some of the results
 appear in our experiments section) it became clear that off-the-shelf
 techniques could not satisfy our requirements for reliable water
 monitoring. This was predominately due to excessively restrictive assumptions
-(\emph{e.g.} that signals were linear, Markov or Gaussian), and/or a failure to
+(e.g., that signals were linear, Markov or Gaussian), and/or a failure to
 produce reasonable uncertainty
 estimates. Green-tech areas, including environmental monitoring and
 energy-demand prediction, are still far from full
@@ -343,7 +343,7 @@ use of the covariance matrix shorthand $K_{m,n} \deq
 K(\vx_m,\vx_n)$. Finally, for now, we'll drop the explicit dependence
 of our probabilities on the hyperparameters $\theta$ (it will be
 implicitly assumed that all quantities are conditioned on knowledge of
-them), and will return to them later. Similarly, we drop the dependence of our probabilities on the values of inputs $x$, which we assume are always known.
+them) and will return to them later. Similarly, we drop the dependence of our probabilities on the values of inputs $x$, which we assume are always known.
 
 \section{Fault Bucket}\label{bucket}
 
@@ -362,9 +362,9 @@ be corrupted in some way, assuming we have a good understanding of the
 latent process. It is hoped that a very broad class of faults can be
 captured in this way. 
 To formalise this idea, we choose an observation noise distribution to
-replace that in \eqref{iidnoise} that models the noise as independent
+replace \eqref{iidnoise} that models the noise as independent
 but not identically distributed with separate variances for the
-non-fault and fault cases.
+non-fault and fault cases:
 \begin{align*}
  p(z \given y, x, \neg\fault, \sigma_n^2)
  &
@@ -394,7 +394,7 @@ typically lies in the future, and old observations are
 typically less pertinent for this task than new ones. We hence approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian.
 We prefer this approximate marginalisation over
 faultiness to heuristics that would designate all
-observations as either faulty or not; we acknowledge our
+observations as either faulty or not---we acknowledge our
 uncertainty about faultiness.
 
 More formally, imagine that we have partitioned our observations
@@ -685,7 +685,7 @@ $\theta$. Unfortunately, analytically marginalising $\theta$ is
 impossible. Most of the hyperparameters of our model can be set by
 optimising their likelihood on a large training set, giving a
 likelihood close to a delta function. This is not true of the
-hyperparameters $\sigma_n$ and $\sigma_f$, due to exactly the same
+hyperparameters $\sigma_n^2$ and $\sigma_f^2$, due to exactly the same
 problematic sums discussed earlier. Instead, we marginalise these
 hyperparameters online using Bayesian Monte Carlo \citep[Chapter
   7]{osbornebayesian}, taking a fixed set of samples in their values
@@ -694,7 +694,7 @@ weights over them. Essentially, we proceed as described above
 independently in parallel for each sample, and combine the predictions
 from each in a final weighted mixture for prediction. Note that we can
 use a similar procedure \citep{garnettosborne} to determine the full
-posterior distributions of $\sigma_n$ and $\sigma_f$, if desired.  It
+posterior distributions of $\sigma_n^2$ and $\sigma_f^2$, if desired.  It
 would be desirable to use non-fixed samples, but, unfortunately, this
 would require reconstructing our full covariance matrix from
 scratch each time a sample is moved.
@@ -705,7 +705,7 @@ observations are prone to faultiness in more than one mode.  If, instead of summ
 wished to marginalise with respect to a density over noise variance,
 we can simply replace the sums over $i$ and $j$ with appropriate
 integrals. Obviously this will only be analytically possible if the
-posteriors for $\sigma_a$ take appropriate, simple forms.  In such a way our algorithm might tackle the general problem of
+posteriors for $\sigma_a^2$ take appropriate, simple forms.  In such a way our algorithm might tackle the general problem of
 heteroskedasticity.
 
 
@@ -719,7 +719,7 @@ to improve results. It would also allow us to consider non-diagonal
 noise contributions.
 
 We have so far not specified our prior for faultiness (as expressed by
-$p(\sigma_a)$ and $p(\sigma_b)$). Within this paper, we consider
+$p(\sigma_a^2)$ and $p(\sigma_b^2)$). Within this paper, we consider
 exclusively a time-independent probability of faultiness, but our framework does not necessarily require this to be so. In some contexts it might be useful to perform inference about the
 fault contribution, rather than the signal of interest.  To do so, we merely switch the roles of the fault and non-fault
 contributions. Note that, using our full posteriors for faultiness, we
@@ -860,16 +860,16 @@ $\sigma_n^2$, were learned using training data similar to but disjoint from the 
 was marginalised using Bayesian Monte Carlo, with a parsimonious 7 samples used.  The prior probability of an observation being faulty was
 set to a constant value of 1\% throughout.
 
-We tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp} based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
+We tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp}-based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
 \begin{equation}\label{eq:thresh}
- |y-\mean{y}{\vy}|>3\sigma_T\,,
+ \bigl\lvert y-\mean{y}{\vy} \bigr\rvert > 3\sigma_T\,,
 \end{equation}
 where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\sigma_T$ is the noise standard deviation on the faultless training set. Of course, methods using \eqref{eq:thresh} or similar can not provide the posterior probability of a point's faultiness, as our algorithm can. Methods tested include:
 
 %\begin{description}
 %\item[ XGP] 
 {\bf XGP:}
-A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}-\ref{app:affine}.
+A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
 
 % \item[ TGP] 
 {\bf TGP:}
@@ -879,7 +879,7 @@ A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if 
 
 %\item[MLH] 
 {\bf MLH:} 
-The most likely heteroscedastic  \acro{gp} \citep{kersting2007most}. Note that for this method we perform retrospective prediction (so that all data is available to make predictions about even the first predictant), as the method is intended to be used. Clearly this allows the method a predictive advantage relative to sequential methods, and the multiple passes over the data effected by \acro{MLH} cannot be readily applied to the sequential problem without requiring a great deal of expensive computation. 
+The most likely heteroscedastic  \acro{gp} \citep{kersting2007most}. Note that for this method we perform retrospective prediction (so that all data is available to make predictions about even the first predictant), as the method is intended to be used. Clearly this allows the method a predictive advantage relative to sequential methods, and the multiple passes over the data effected by \acro{mlh} cannot be readily applied to the sequential problem without requiring a great deal of expensive computation. 
 %  \item[KF] A Kalman filter to perform one-step-lookahead predictions in an online fashion. Any datum identified as a fault by the threshold \eqref{eq:thresh} is simply ignored and discarded.
 
 {\bf EKF:}
@@ -909,7 +909,7 @@ datasets.
 % The performance is remarkably better under mean-squared
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
-detection rates for the faulty points is generally excellent. The results reveal that approximations \ref{app:single_gaussian}-\ref{app:affine} do not result in significant loss of performance relative to exhaustive search.
+detection rates for the faulty points is generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search.
 
 \begin{table}
   \centering
@@ -948,6 +948,7 @@ fast, effective prediction in the presence of unknown faults and the
 simultaneous detection of faulty observations.
 
 \small
+\setlength{\parskip}{0\baselineskip}
 \bibliography{fault_bucket_icml_2011}
 \bibliographystyle{unsrt}
 
