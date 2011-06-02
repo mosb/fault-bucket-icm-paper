@@ -61,7 +61,7 @@
 \newcommand{\new}{\marginpar{NEW}}
 
 
-\title{A Learning Method for Pattern Detection, Cleaning and
+\title{A Machine Learning Method for Pattern Detection, Cleaning and
 Prediction of Environmental Data}
 
 %  \title{A ``Fault Bucket'' for Time-Series Prediction with
@@ -126,17 +126,7 @@ faces. It is also a problem to which the machine learning community
 can make positive, significant contributions. Water sustainability
 begins with proper water monitoring, which requires the analysis and
 interpretation of vast amounts of environmental data
-\citep{wagner2006guidelines}. To accomplish this, we need to design
-techniques for detecting patterns and making predictions with
-challenging datasets, fraught with 
-%missing data, discontinuities and
-\textit{a priori} unknown types of nonlinearity and non-stationarity.
-These techniques will enable us to provide operators with high-level
-summaries for better decision support and, in the future, to increase
-the level of automation and efficiency in water management systems.
-
-
-In this paper, we attack the problem of fault detection, correction
+\citep{wagner2006guidelines}. In this paper, we attack the problem of fault detection, correction
 and prediction in water monitoring signals.
 Here measurements are often corrupted in non-trivial ways by various
 intermittent faulty sensing and communication mechanisms, giving rise
@@ -150,10 +140,19 @@ deployed for this purpose. In particular, there is a clear need for
 flexible algorithms, able to cope with signals and faults of many
 different types without placing a significant model-building burden
 upon users. Such algorithms must also be able to run reliably in
-real-time on incoming data.
+real-time on incoming data. 
+% To accomplish this, we need to design
+% techniques for detecting patterns and making predictions with
+% challenging datasets, fraught with 
+% %missing data, discontinuities and
+% \textit{a priori} unknown types of nonlinearity and non-stationarity.
+These techniques will enable us to provide operators with high-level
+summaries for better decision support and, in the future, to increase
+the level of automation and efficiency in water management systems.
+
 \begin{figure*}[t!]
 \begin{center}
- \includegraphics[width=\textwidth]{watermonitoring.eps}
+ \includegraphics[width=\textwidth, height=5cm]{watermonitoring.eps}
 \end{center}
 \caption{16 months worth of data from 6 representative
 signals in water quality monitoring,
@@ -177,15 +176,18 @@ and one-class) detection is vast
  Isermann2005, Ding2008,Markou2003,Chandola:2009,Khan2010,Dereszynski}.
 Unfortunately, the problems solved by most of these techniques are of
 very different character to our own, rendering such techniques
-inapplicable. Further, many of these are too restrictive
-(\emph{e.g.} use linear, Markov or Gaussian assumptions) or fail to
+inapplicable. Further, after
+much experimentation with those methods that are applicable (some of the results
+appear in our experiments section) it became clear that off-the-shelf
+techniques could not satisfy our requirements for reliable water
+monitoring. This was predominately due to excessively restrictive assumptions
+(\emph{e.g.} that signals were linear, Markov or Gaussian), and/or a failure to
 produce reasonable uncertainty
 estimates. Green-tech areas, including environmental monitoring and
 energy-demand prediction, are still far from full
 automation; the provision of uncertainty estimates is necessary to
 allow human operators to make appropriate decisions. For this reason,
-we focus on developing \acro{gp}-based
-techniques to build probabilistic nonlinear models of the signal.  In
+we focus on developing probabilistic nonlinear models of the signal. In
 addition to
 providing posterior probabilities of observation faultiness, we are
 able to perform effective prediction for the latent process even in
@@ -200,25 +202,20 @@ has approached this problem by creating observation models that
 specify
 the anticipated potential fault types \textit{a priori}
 \citep{garnettosborne}, but this is usually an unreasonable assumption
-in highly variable or poorly understood environments. As a result of
-much experimentation (some of the results with alternative techniques
-appear in our experiments section) it became clear that off-the-shelf
-techniques could not satisfy our requirements for reliable water
-monitoring, for this reason we developed of a catch-all ``fault
-bucket,'' which can identify and treat
-appropriately data readings suspected of being corrupted in some way.
-Notably, we do not require the specification of precise fault models.
+in highly variable or poorly understood environments. 
+In our proposed  ``fault bucket'' approach, each point is considered
+to have been generated from either a nominal or generic faulty process; we do not require the specification of precise fault models. In
+this way, our model can simultaneously identify anomalies and robustly
+make predictions in the presence of sensor faults. 
+% Since we cannot
+% make any strong assumptions about the nature of the faults, we model
+% the faulty process as a distribution with extremely high variance.
 The result is a fast and efficient method for data-stream prediction
 that can manage a
 wide range of faults without requiring significant
 domain-specific knowledge.
 
-% In the proposed  ``fault bucket'' approach, each point is considered
-% to have been generated from either a nominal or faulty process. In
-% this way, our model can simultaneously identify anomalies and robustly
-% make predictions in the presence of sensor faults. Since we cannot
-% make any strong assumptions about the nature of the faults, we model
-% the faulty process as a distribution with extremely high variance.
+
 % 
 % 
 % This approach has been effectively utilized in \cite{Dereszynski}.
@@ -352,14 +349,14 @@ them), and will return to them later. Similarly, we drop the dependence of our p
 
 We propose an algorithm that is designed to deal with faults of many different, unspecified types. We use a sequential scheme, applicable for ordered data such as time series, partitioning the data available at any point into old and new halves.  We then approximately marginalise the faultiness of old observations, storing and then updating our results for future use. This gives rise to an efficient and fast algorithm. In order to effect our scheme, we make four key approximations:
 \begin{enumerate}
- \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance (as in \cite{Dereszynski}).
+ \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance.
 \item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
-\item \label{app:independence} {\bf Old/new independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
+\item \label{app:independence} {\bf Old/new noise independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
 \item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
 \end{enumerate}
 We will detail and justify these approximations further below.
 
-Approximation \ref{app:fb} gives us a single catch-all ``fault bucket''. It is built upon the expectation that points that are more likely to have been generated by noise with wide variance than under the normal
+Approximation \ref{app:fb} gives us a single catch-all ``fault bucket'', as in \cite{Dereszynski}. It is built upon the expectation that points that are more likely to have been generated by noise with wide variance than under the normal
 predictive model of the \acro{gp} can reasonably be assumed to
 be corrupted in some way, assuming we have a good understanding of the
 latent process. It is hoped that a very broad class of faults can be
@@ -832,10 +829,10 @@ undergoes physical trauma which results in a loss of calibration.
 The next dataset contains a synthetic anomaly where the water level
 rises quickly, but smoothly, before returning back to normal. This
 would be indicative of a genuine environmental event such as a flash
-flood.
+flood. Both synthetic datasets represented sustained faults, of length 335 and 161 observations respectively.
 %\subsubsection{pH}
 Our first real dataset deals with pH measurements from the United States Geological Survey, a common indicator of water quality. In this series, a clear sensor fault can be seen
-in which the observation undergo a sudden decrease in value.
+in which the observations undergo a sudden, sustained decrease in value.
 %\subsubsection{Painting}
 The next (real) dataset contains a fault type called ``painting,'' which is
 an error that occurs when ice builds on a sensor obscuring some of the
@@ -859,10 +856,8 @@ zero prior mean function was appropriate, and the functions were all
 modeled using a Mat\'{e}rn covariance with parameter $\nu =
 \nicefrac{5}{2}$ \citep{gpml}.  The hyperparameters for this
 covariance, including the normal observation noise variance
-$\sigma_n^2$, were learned using training data nearby but not included
-in the test datasets.  The unknown fault noise variance $\sigma_f^2$
-was marginalised using Bayesian Monte Carlo, with 7 samples in this
-parameter.  The prior probability of an observation being faulty was
+$\sigma_n^2$, were learned using training data similar to but disjoint from the test datasets.  The unknown fault noise variance $\sigma_f^2$
+was marginalised using Bayesian Monte Carlo, with a parsimonious 7 samples used.  The prior probability of an observation being faulty was
 set to a constant value of 1\% throughout.
 
 We tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp} based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
@@ -928,7 +923,7 @@ detection rates for the faulty points is generally excellent. The results reveal
   \label{tbl:results}
   \begin{tabular}{ccccccccc}
     \toprule
-& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{Change-in-dynamics dataset}\\
+& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{`Flash-flood' dataset}\\
     \cmidrule(l){2-5} \cmidrule(l){6-9}
     Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
 & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
