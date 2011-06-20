@@ -212,7 +212,6 @@ sensors can experience faults, which complicate the relationship
 between $z$ and $y$.
 
 \section{Fault Bucket}\label{bucket}
-
 Rather than specifying explicit parameters for every possible fault
 type, we propose a single catch-all ``fault bucket'' that can identify
 and treat appropriately measurements that are suspected of being
@@ -223,6 +222,14 @@ predictive model of the Gaussian process can reasonably be assumed to
 be corrupted in some way, assuming we have a good understanding of the
 latent process. It is hoped that a very broad class of faults can be
 captured in this way.
+
+In order to effect our scheme, we make four key approximations:
+\begin{enumerate}
+ \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance.
+\item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
+\item \label{app:independence} {\bf Old/new independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
+\item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
+\end{enumerate}
 
 To formalize this idea, we choose an observation noise distribution to
 replace that in \eqref{iidnoise} that models the noise as independent
@@ -609,8 +616,9 @@ algorithm did an excellent job of identifying faults when they occur,
 and made excellent predictions.  
 
 We also tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp}-based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
-\begin{equation}\label{eq:thresh}
+\begin{equation}
  \bigl\lvert y-\mean{y}{\vy} \bigr\rvert > 3\sigma_T\,,
+ \label{eq:thresh}
 \end{equation}
 where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\sigma_T$ is the noise standard deviation on the faultless training set. Of course, methods using \eqref{eq:thresh} or similar can not provide the posterior probability of a point's faultiness, as our algorithm can. Methods tested include:
 
@@ -643,7 +651,7 @@ datasets.
 In addition to superior predictive performance, our
 detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates provide a human operator with an indication as to whether more sophisticated analysis is necessary.
 
-\begin{table*}
+\begin{table*}[H]
   \begin{center}
   \caption{Quantitative comparison of different algorithms on the
     synthetic datasets.  For each dataset, we show the mean squared error
