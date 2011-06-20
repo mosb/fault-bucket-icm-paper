@@ -184,15 +184,13 @@ make predictions in the presence of sensor faults.
 The result is a fast and efficient method for data-stream prediction
 that can manage a
 wide range of faults without requiring significant
-domain-specific knowledge.\section{Gaussian Processes}
+domain-specific knowledge.
 
+\section{Fault Bucket}\label{bucket}
 Gaussian processes provide a simple, flexible framework for performing
-Bayesian inference about functions \citep{gpml}.  A Gaussian process
-is completely defined by its first two moments: a mean function
-$\mu\colon \cm{X} \to \R$ and a symmetric positive semidefinite
-covariance function $K\colon \cm{X} \times \cm{X} \to \R$.
-
-Exact measurements of the latent function are typically not available.
+Bayesian inference about latent functions \citep{gpml}.  In
+environmental monitoring, exact measurements of the latent function
+are typically not available.
 % however,
 %  we may combine the Gaussian process distribution on the
 % latent function with an observation model that takes into account
@@ -211,7 +209,6 @@ variance $\sigma_n^2$. Note that this model is inappropriate when
 sensors can experience faults, which complicate the relationship
 between $z$ and $y$.
 
-\section{Fault Bucket}\label{bucket}
 Rather than specifying explicit parameters for every possible fault
 type, we propose a single catch-all ``fault bucket'' that can identify
 and treat appropriately measurements that are suspected of being
@@ -223,7 +220,7 @@ be corrupted in some way, assuming we have a good understanding of the
 latent process. It is hoped that a very broad class of faults can be
 captured in this way.
 
-In order to effect our scheme, we make four key approximations:
+We make four key approximations:
 \begin{enumerate}
  \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance.
 \item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
@@ -592,7 +589,7 @@ time a sample is moved.
 \begin{figure*}
   \centering
   \small
-  \psff{painting} \\
+  \psff{painting_big} \\
   \psff{fishkiller}
   \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
     predictions of the fault-bucket algorithm on (top), the painting
@@ -601,6 +598,34 @@ time a sample is moved.
     in grey circles.}
   \label{justfb}
 \end{figure*}
+\begin{table*}
+  \begin{center}
+  \caption{Quantitative comparison of different algorithms on the
+    synthetic datasets.  For each dataset, we show the mean squared error
+    (\textsc{mse}), the log likelihood of the true data ($\log p(\bm{y}
+    \given \bm{x})$), and the true-positive and false-positive rates
+    of detection for faulty points (\textsc{tpr} and \textsc{fpr}),
+    respectively, with all methods permitted a `burn-in' period of 50 points. The best value for each set of results is highlighted in
+    bold.}
+  \label{tbl:results}
+  \begin{tabular}{ccccccccc}
+    \toprule
+& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{``Flash-flood'' dataset}\\
+    \cmidrule(l){2-5} \cmidrule(l){6-9}
+    Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
+& \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
+\midrule
+    \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & \textbf{0.829} & {0.016} \\
+    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & \textbf{0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & \textbf{0.012} \\
+    \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & \textbf{0.829} & 0.083 \\
+%    \scshape{argp} & 2.340 & $-1.93 \times 10^9$ & 0.6 & 0.4 & 1.097 & $-7.52\times 10^8$ & 0.178 & 0.822 \\
+    \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.045 & 0.262 \\
+%    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 & 0.360 & $-3.54 \times 10^4$ & 0.835 & 0.046 \\
+   \scshape{ekf} & 0.060 & $-1.26 \times 10^4$ & 0.551 & 0.258 & 0.613 & $-1.81\times 10^4$ & 0.169 & 0.768 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{table*}
 
 %% % Finally, some applications might required a hard decision about
 %% % whether a particular observation was faulty.  This would be necessary,
@@ -650,36 +675,6 @@ datasets.
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
 detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates provide a human operator with an indication as to whether more sophisticated analysis is necessary.
-
-\begin{table*}[H]
-  \begin{center}
-  \caption{Quantitative comparison of different algorithms on the
-    synthetic datasets.  For each dataset, we show the mean squared error
-    (\textsc{mse}), the log likelihood of the true data ($\log p(\bm{y}
-    \given \bm{x})$), and the true-positive and false-positive rates
-    of detection for faulty points (\textsc{tpr} and \textsc{fpr}),
-    respectively, with all methods permitted a `burn-in' period of 50 points. The best value for each set of results is highlighted in
-    bold.}
-  \label{tbl:results}
-  \begin{tabular}{ccccccccc}
-    \toprule
-& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{``Flash-flood'' dataset}\\
-    \cmidrule(l){2-5} \cmidrule(l){6-9}
-    Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
-& \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
-\midrule
-    \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & \textbf{0.829} & {0.016} \\
-    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & \textbf{0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & \textbf{0.012} \\
-    \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & \textbf{0.829} & 0.083 \\
-%    \scshape{argp} & 2.340 & $-1.93 \times 10^9$ & 0.6 & 0.4 & 1.097 & $-7.52\times 10^8$ & 0.178 & 0.822 \\
-    \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.045 & 0.262 \\
-%    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 & 0.360 & $-3.54 \times 10^4$ & 0.835 & 0.046 \\
-   \scshape{ekf} & 0.060 & $-1.26 \times 10^4$ & 0.551 & 0.258 & 0.613 & $-1.81\times 10^4$ & 0.169 & 0.768 \\
-    \bottomrule
-  \end{tabular}
-  \end{center}
-\end{table*}
-
 
 \section{Conclusion}
 We have proposed a novel algorithm, the ``fault bucket,'' for managing
