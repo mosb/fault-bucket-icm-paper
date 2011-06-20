@@ -26,6 +26,7 @@
 %\usepackage[T1]{fontenc}
 \usepackage{nicefrac}
 \usepackage{booktabs}
+\usepackage{pst-all}
 
 \usepackage{natbib}
 
@@ -75,14 +76,14 @@
   \icmlkeywords{Gaussian processes, time-series prediction, fault
     detection, hyperparameter marginalization}
     
-\icmlauthor{Michael Osborne*}{mosb@robots.ox.ac.uk}
-\icmlauthor{Roman Garnett$\star$}{rgarnett@andrew.cmu.edu}
-\icmlauthor{Kevin Swersky$\dagger$}{kevin@aquaticinformatics.com}
-\icmlauthor{Nande de Freitas$\ddagger$}{nando@cs.ubc.ca}
-\icmladdress{*Department of Computer Science, Oxford University \vspace{-10pt}}
-\icmladdress{$\star$Department of Computer Science, Carnegie Mellon University \vspace{-10pt}}
-\icmladdress{$\dagger$Aquatic Informatics \vspace{-10pt}}
-\icmladdress{$\ddagger$Department of Computer Science, University of British Columbia}
+\icmlauthor{Michael Osborne$^\ast$}{mosb@robots.ox.ac.uk}
+\icmlauthor{Roman Garnett$^\dagger$}{rgarnett@andrew.cmu.edu}
+\icmlauthor{Kevin Swersky$^\ddagger$}{kevin@aquaticinformatics.com}
+\icmlauthor{Nande de Freitas$^\text{\S}$}{nando@cs.ubc.ca}
+\icmladdress{$^\ast$Department of Computer Science, Oxford University \vspace{-10pt}}
+\icmladdress{$^\dagger$Department of Computer Science, Carnegie Mellon University \vspace{-10pt}}
+\icmladdress{$^\ddagger$Aquatic Informatics \vspace{-10pt}}
+\icmladdress{$^\text{\S}$Department of Computer Science, University of British Columbia}
 
 \vskip 0.3in
 ]
@@ -229,6 +230,19 @@ predictive model of the Gaussian process can reasonably be assumed to
 be corrupted in some way, assuming we have a good understanding of the
 latent process. It is hoped that a very broad class of faults can be
 captured in this way.
+
+\begin{figure*}
+  \centering
+  \small
+  \psff{painting_big} \\
+  \psff{fishkiller}
+  \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
+    predictions of the fault-bucket algorithm on (top), the painting
+    dataset and (bottom), the ``fishkiller'' dataset.  Detected faults are
+    marked in black crosses, and the unobserved true values are marked
+    in grey circles.}
+  \label{justfb}
+\end{figure*}
 
 We make four key approximations:
 \begin{enumerate}
@@ -536,24 +550,24 @@ applied.
 
 %% \subsection{Discussion}
 
-We will discuss briefly the management of hyperparamters, denoted
-$\theta$. Unfortunately, analytically marginalizing $\theta$ is
-impossible. Most of the hyperparameters of our model can be set by
-optimizing their likelihood on a large training set, giving a
-likelihood close to a delta function. This is not true of the
-hyperparameters $\sigma_n$ and $\sigma_f$, due to exactly the same
-problematic sums discussed earlier. Instead, we marginalize these
-hyperparameters online using Bayesian Monte Carlo \citep[Chapter
-  7]{osbornebayesian}, taking a fixed set of samples in their values
-and using the hyperparameter likelihoods to construct weights over
-them. Essentially, we proceed as described above independently in
-parallel for each sample, and combine the predictions from each in a
-final weighted mixture for prediction. Note that we can use a similar
-procedure \citep{garnettosborne} to determine the full posterior
-distributions of $\sigma_n$ and $\sigma_f$, if desired.  It would be
-desirable to use non-fixed samples, but, unfortunately, this would
-require reconstructing our full covariance matrix from scratch each
-time a sample is moved.
+%% We will discuss briefly the management of hyperparamters, denoted
+%% $\theta$. Unfortunately, analytically marginalizing $\theta$ is
+%% impossible. Most of the hyperparameters of our model can be set by
+%% optimizing their likelihood on a large training set, giving a
+%% likelihood close to a delta function. This is not true of the
+%% hyperparameters $\sigma_n$ and $\sigma_f$, due to exactly the same
+%% problematic sums discussed earlier. Instead, we marginalize these
+%% hyperparameters online using Bayesian Monte Carlo \citep[Chapter
+%%   7]{osbornebayesian}, taking a fixed set of samples in their values
+%% and using the hyperparameter likelihoods to construct weights over
+%% them. Essentially, we proceed as described above independently in
+%% parallel for each sample, and combine the predictions from each in a
+%% final weighted mixture for prediction. Note that we can use a similar
+%% procedure \citep{garnettosborne} to determine the full posterior
+%% distributions of $\sigma_n$ and $\sigma_f$, if desired.  It would be
+%% desirable to use non-fixed samples, but, unfortunately, this would
+%% require reconstructing our full covariance matrix from scratch each
+%% time a sample is moved.
 
 %% Our proposed algorithm steps through our data one at a time, so that
 %% $\data_b$ always contains only a single observation. However, it would
@@ -596,18 +610,6 @@ time a sample is moved.
 %%   \label{compare}
 %% \end{figure*}
 
-\begin{figure*}
-  \centering
-  \small
-  \psff{painting_big} \\
-  \psff{fishkiller}
-  \caption{Mean and $\pm3\sigma$ standard-deviation bounds for the
-    predictions of the fault-bucket algorithm on (top), the painting
-    dataset and (bottom), the ``fishkiller'' dataset.  Detected faults are
-    marked in black crosses, and the unobserved true values are marked
-    in grey circles.}
-  \label{justfb}
-\end{figure*}
 \begin{table*}
   \begin{center}
   \caption{Quantitative comparison of different algorithms on the
