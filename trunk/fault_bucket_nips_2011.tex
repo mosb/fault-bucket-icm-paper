@@ -867,11 +867,11 @@ where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\
 %\begin{description}
 %\item[ XGP] 
 {\bf XGP:}
-A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
+A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f^2 \p{\fault}{\vy} + \sigma_n^2 \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
 
 % \item[ TGP] 
 {\bf TGP:}
-A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f$.
+A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f^2$.
 
 %  \item[ ARGP] An auto-regressive Gaussian process (over the last 10 points), with a point identified as faulty using \eqref{eq:thresh}. If faulty, the value for the observation $y$ is taken as $\mean{y}{\vy}$ for future predictions.
 

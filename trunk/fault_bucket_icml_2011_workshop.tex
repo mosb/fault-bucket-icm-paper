@@ -80,7 +80,7 @@
 \icmlauthor{Roman Garnett$^\dagger$}{rgarnett@andrew.cmu.edu}
 \icmlauthor{Kevin Swersky$^\ddagger$}{kevin@aquaticinformatics.com}
 \icmlauthor{Nande de Freitas$^\text{\S}$}{nando@cs.ubc.ca}
-\icmladdress{$^\ast$Department of Computer Science, Oxford University \vspace{-10pt}}
+\icmladdress{$^\ast$Department of Engineering Science, University of Oxford \vspace{-10pt}}
 \icmladdress{$^\dagger$Department of Computer Science, Carnegie Mellon University \vspace{-10pt}}
 \icmladdress{$^\ddagger$Aquatic Informatics \vspace{-10pt}}
 \icmladdress{$^\text{\S}$Department of Computer Science, University of British Columbia}
@@ -185,8 +185,7 @@ specify
 the anticipated potential fault types \textit{a priori}
 \citep{garnettosborne}, but this is usually an unreasonable assumption
 in highly variable or poorly understood environments. 
-In our proposed  ``fault bucket'' approach, each point is considered
-to have been generated from either a nominal or generic faulty process; we do not require the specification of precise fault models. In
+In our proposed  ``fault bucket'' approach, we do not require the specification of precise fault models. In
 this way, our model can simultaneously identify anomalies and robustly
 make predictions in the presence of sensor faults. 
 % Since we cannot
@@ -229,7 +228,10 @@ points that are more likely under this model than under the normal
 predictive model of the Gaussian process can reasonably be assumed to
 be corrupted in some way, assuming we have a good understanding of the
 latent process. It is hoped that a very broad class of faults can be
-captured in this way.
+captured in this way. To formalize this idea, we choose an observation noise distribution to
+replace that in \eqref{iidnoise} that models the noise as independent
+but not identically distributed with separate variances $\sigma_n^2$ and $\sigma_f^2$ for the
+non-fault and fault cases.
 
 \begin{figure*}
   \centering
@@ -244,51 +246,43 @@ captured in this way.
   \label{justfb}
 \end{figure*}
 
-We make four key approximations:
-\begin{enumerate}
- \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance.
-\item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
-\item \label{app:independence} {\bf Old/new independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
-\item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
-\end{enumerate}
+% We make four key approximations:
+% \begin{enumerate}
+%  \item \label{app:fb} {\bf Fault bucket:} Faulty observations are assumed to be generated from a Gaussian noise distribution with a very wide variance.
+% \item \label{app:single_gaussian} {\bf Single-Gaussian marginal:} A mixture of Gaussians, weighted by the posterior probabilities of faultiness of old data, is approximated as a single moment-matched Gaussian.
+% \item \label{app:independence} {\bf Old/new noise independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
+% \item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
+% \end{enumerate}
 
-To formalize this idea, we choose an observation noise distribution to
-replace that in \eqref{iidnoise} that models the noise as independent
-but not identically distributed with separate variances for the
-non-fault and fault cases.
-\begin{align*}
- p(z \given y, x, \neg\fault, \sigma_n^2)
- &
- \deq
- \cm{N}(z; y, \sigma_n^2)
- \\
- p(z \given y, x, \fault, \sigma_f^2)
- &
- \deq
- \cm{N}(z; y, \sigma_f^2),
-\end{align*}
-where $\fault \in \lbrace 0, 1 \rbrace$ is a binary indicator of
-whether the observation $z(x)$ was faulty and $\sigma_f > \sigma_n$ is
-the standard deviation around the mean of faulty measurements.  The
-values of both $\sigma_n$ and $\sigma_f$ form hyperparameters of our
-model and are hence included in $\theta$.
+
+% \begin{align*}
+%  p(z \given y, x, \neg\fault, \sigma_n^2)
+%  &
+%  \deq
+%  \cm{N}(z; y, \sigma_n^2)
+%  \\
+%  p(z \given y, x, \fault, \sigma_f^2)
+%  &
+%  \deq
+%  \cm{N}(z; y, \sigma_f^2),
+% \end{align*}
+% where $\fault \in \lbrace 0, 1 \rbrace$ is a binary indicator of
+% whether the observation $z(x)$ was faulty and $\sigma_f > \sigma_n$ is
+% the standard deviation around the mean of faulty measurements.  
+% % The
+% values of both $\sigma_n$ and $\sigma_f$ form hyperparameters of our
+% model and are hence included in $\theta$.
 
 Of course, {\it a priori}, we do not know whether any given
 observation will be faulty.  Unfortunately, managing our uncertainty
 about the ``faultiness'' of all available observations is a
 challenging task. With $N$ observations available, there are $2^N$
-possible assignments of faultiness. It quickly becomes computationally
-infeasible to marginalize over all these possible values.
-
-Instead, we propose a sequential approach, applicable for ordered data
-such as time series. For time series, the value to be predicted $y\st$
-typically lies in the future, and less-recent observations are
-typically less pertinent for this task than more-recent ones. The
-intuition behind our approach is to, at a given time step, ``merge''
-our current model with the uncertainty present in the inferred
-faultiness of the most recent observation. In effect, we represent
+possible assignments of faultiness. It quickly becomes computationally infeasible to marginalize over all these possible values. Instead, we approximate our marginal predictions, a sum of Gaussians weighted by the posterior probabilities of faultiness of old data, as a single moment-matched Gaussian. In order to effect this approximation, we adopt a sequential approach, applicable for ordered data
+such as time series. For time series, the value to be predicted $y\st$ typically lies in the future; we can hence assume that the faultiness of old observations is less pertinent than that of newer observations. At any point in time, then, we approximately resolve our sum over faultiness 
+by representing
 each observation as having a known variance lying between between
-$\sigma_n^2$ and $\sigma_f^2$. The more likely an observation's
+$\sigma_n^2$ and $\sigma_f^2$.
+ The more likely an observation's
 faultiness, the closer its assigned variance will be to the (large)
 fault variance and the less relevant it will become for inference
 about the latent process. This approximate observation is then used
@@ -298,15 +292,8 @@ faultiness is preferable to heuristics that would designate all
 observations as either faulty or not; our method acknowledges the
 uncertainty that may exist in our belief about faultiness.
 
-As mentioned before, to perform exact inference in such a model, we
-will ultimately need to approximate a weighted sum of Gaussian
-predictions made using the different possible values for the noise
-variance.  To handle this, we will perform a ``merging;''
-approximating this sum of Gaussians as a moment-matched single
-Gaussian.  The mathematical details of this approximation are not
-reproduced here for brevity; numerous computational ``tricks'' must be
-applied.
-
+ The further mathematical details of our approximations are not
+reproduced here for brevity.
 %% So, we take
 %% \begin{align*}
 %%  &\p{y\st}{\data_{a}} \simeq \cm{N}\bigl(y\st; \amean{y\st}{\data_a}, \acov{y\st}{\data_a}\bigr),%\label{eq:pya}
@@ -649,7 +636,7 @@ applied.
 %\subsection{Results}
 Figure \ref{justfb} shows the performance of the fault-bucket
 algorithm on the two real datasets.  In both cases, the fault-bucket
-algorithm did an excellent job of identifying faults when they occur,
+algorithm did identified faults when they occur,
 and made excellent predictions.  
 
 We also tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp}-based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
@@ -662,11 +649,11 @@ where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\
 %\begin{description}
 %\item[ XGP] 
 {\bf XGP:}
-A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f \p{\fault}{\vy} + \sigma_n \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
+A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f^2 \p{\fault}{\vy} + \sigma_n^2 \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of our approximations.
 
 % \item[ TGP] 
 {\bf TGP:}
-A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f$.
+A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f^2$.
 
 %  \item[ ARGP] An auto-regressive Gaussian process (over the last 10 points), with a point identified as faulty using \eqref{eq:thresh}. If faulty, the value for the observation $y$ is taken as $\mean{y}{\vy}$ for future predictions.
 
@@ -686,7 +673,7 @@ datasets.
 % The performance is remarkably better under mean-squared
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
-detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates provide a human operator with an indication as to whether more sophisticated analysis is necessary.
+detection rates for the faulty points are generally excellent. The results reveal that our algorithm is competitive with exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates provide a human operator with an indication as to whether more sophisticated analysis is necessary.
 
 \section{Conclusion}
 We have proposed a novel algorithm, the ``fault bucket,'' for managing
