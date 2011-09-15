@@ -1,5 +1,5 @@
-\documentclass{article} % For LaTeX2e
-\usepackage{nips11submit_e,times}
+\documentclass[twoside]{article}
+\usepackage{aistats2012}
 
 %\usepackage[letterpaper]{geometry}
 \usepackage{graphicx}
@@ -61,48 +61,29 @@
 \newcommand{\new}{\marginpar{NEW}}
 
 
-\title{A Machine-Learning Method for Pattern Detection, Cleaning, and
-Prediction of Environmental Data}
-
-%  \title{A ``Fault Bucket'' for Time-Series Prediction with
-%    Uncharacterised Faulty Observations}
-
-%\nipsfinalcopy
-
 \begin{document}
 
-\maketitle
+\twocolumn[
 
-\author{
-David S.~Hippocampus\thanks{ Use footnote for providing further information
-about author (webpage, alternative address)---\emph{not} for acknowledging
-funding agencies.} \\
-Department of Computer Science\\
-Cranberry-Lemon University\\
-Pittsburgh, PA 15213 \\
-\texttt{hippo@cs.cranberry-lemon.edu} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\AND
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-(if needed)\\
-}
+\aistatstitle{A Machine-Learning Method for Pattern Detection, Cleaning, and
+Prediction of Environmental Data}
+
+\aistatsauthor{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 }
+
+\aistatsaddress{ Unknown Institution 1 \And Unknown Institution 2 \And Unknown Institution 3 } ]
+
+% \aistatsauthor{ Michael Osborne \And Anonymous Author 2 \And Anonymous Author 3 }
+% 
+% \aistatsaddress{ Department of Engineering Science\\University of Oxford\\ \url{mosb@robots.ox.ac.uk} \And Unknown Institution 2 \And Unknown Institution 3 } ]
+
+% \icmlauthor{$^\ast$}{}
+% \icmlauthor{Roman Garnett$^\dagger$}{rgarnett@andrew.cmu.edu}
+% \icmlauthor{Kevin Swersky$^\ddagger$}{kevin@aquaticinformatics.com}
+% \icmlauthor{Nando de Freitas$^\text{\S}$}{nando@cs.ubc.ca}
+% \icmladdress{$^\ast$ \vspace{-10pt}}
+% \icmladdress{$^\dagger$Department of Computer Science, Carnegie Mellon University \vspace{-10pt}}
+% \icmladdress{$^\ddagger$Aquatic Informatics \vspace{-10pt}}
+% \icmladdress{$^\text{\S}$Department of Computer Science, University of British Columbia}
 
 \begin{abstract}
 Many signals of interest are corrupted by faults of an unknown
@@ -294,7 +275,7 @@ $
    \bigl( x, y(x) \bigr)
  \bigr\rbrace
  \deq
- ( \bm{x}, \bm{fy} )
+ ( \bm{x}, \bm{y} )
 $,
 the posterior distribution (itself given by a Gaussian Process) of $f\st \deq f(x\st)$ given these data is
 \begin{equation*}
@@ -315,9 +296,7 @@ where the posterior mean and covariance are
  \mu(x\st; \theta)
  +
  K(x\st, \bm{x}; \theta)
- \bigl(
- K(\bm{x}, \bm{x}; \theta) + \sigma_n^2 \bm{I}
- \bigr)\inv
+V \inv
  \bigl(
    \bm{y} - \mu(\bm{x}; \theta)
  \bigr)
@@ -328,11 +307,12 @@ where the posterior mean and covariance are
  K(x\st, x\st; \theta)
  -
  K(x\st, \bm{x}; \theta)
- \bigl(
-   K(\bm{x}, \bm{x}; \theta) + \sigma_n^2 \bm{I}
- \bigr)\inv
- K(\bm{x}, x\st; \theta).
+ V\inv
+ K(\bm{x}, x\st; \theta),
 \end{align*}
+for $ V \deq 
+ K(\bm{x}, \bm{x}; \theta) + \sigma_n^2 \bm{I}
+ $.
 
 We now make some definitions for the sake of readability. Henceforth,
 we assume that our observations $\vy$ have already been scaled by the
@@ -431,10 +411,11 @@ p\bigl(\fault(\data_a) \given \vy_{a}\bigr) = \Prob{\sigma_a = \sigma_f}{\vy_{a}
 $.
 If we were to perform predictions for some $f\st$ using $\data_a$
 alone, we would need to evaluate
-\begin{equation*}
-\p{f\st}{\vy_{a}} = \sum_{i} \Prob{\vs^i_{a}}{\vy_a} \p{f\st}{\vy_a, \vs^{i}_{a}}
-=\sum_{i} \Prob{\vs^i_{a}}{\vy_a} \cm{N}\bigl(f\st; \mean{f\st}{\vy_a, \vs^{i}_{a}}, \cov{f\st}{\vy_a, \vs^{i}_{a}}\bigr),
-\end{equation*}
+\begin{align*}
+& \p{f\st}{\vy_{a}} \\
+& = \sum_{i} \Prob{\vs^i_{a}}{\vy_a} \p{f\st}{\vy_a, \vs^{i}_{a}} \\
+& =\sum_{i} \Prob{\vs^i_{a}}{\vy_a} \cm{N}\bigl(f\st; \mean{f\st}{\vy_a, \vs^{i}_{a}}, \cov{f\st}{\vy_a, \vs^{i}_{a}}\bigr),
+\end{align*}
 the weighted sum of Gaussian predictions made using the different
 possible values for $\vs_{a}$.  We now use approximation \ref{app:single_gaussian}. It is our hope that our predictions
 for $f\st$ are not so sensitive to the noise in our observations that
@@ -443,7 +424,10 @@ case, the quality of this approximation will improve over time---if
 $f\st$ is far removed from our old data $\data_a$, then our
 predictions really will not be very sensitive to $\sigma_a$. So, we take
 \begin{align*}
- &\p{f\st}{\vy_{a}} \simeq \cm{N}\bigl(f\st; K_{\star,a} \tilde{V}_a^{-1} \vy_a, K_{\star,\star} - K_{\star,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,\star} 
+& \p{f\st}{\vy_{a}} \simeq
+\cm{N}\bigl(f\st; K_{\star,a} \tilde{V}_a^{-1} \vy_a, 
+\\ & \hspace{1cm}
+K_{\star,\star} - K_{\star,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,\star} 
  - (K_{\star,a} \tilde{V}_a^{-1}\vy_a)^2\bigr),%\label{eq:pya}
 \end{align*}
 % where we have
@@ -483,20 +467,20 @@ same technique. We can then use the Cholesky factor of $\tilde{V}_a$ to compute 
 % \eqref{eq:ameana} and \eqref{eq:acova}.
 With these calculations performed, imagine receiving
 further data $\data_b$. To progress, we make approximation \ref{app:independence}; we assume that faults will not persist longer than $|\data_b|$. To be precise, we assume
-\begin{align} \label{eq:approx}
-p(\vs^{i,j}_{a,b},\vy_{a,b}) & \simeq p(\vy_a)\,\Prob{\vs^i_{a}}{\vy_a}\,
+\begin{equation} \label{eq:approx}
+p(\vs^{i,j}_{a,b},\vy_{a,b})  \simeq p(\vy_a)\,\Prob{\vs^i_{a}}{\vy_a}\,
 %P
 p(\vs^j_{b})\,\p{\vy_b}{\vs^{i,j}_{a,b},\vy_{a}}
-\end{align}
+\end{equation}
 Our predictions are now
-\begin{align}
+\begin{multline}
 \p{f\st}{\vy_{a,b}} %= \sum_{i} \sum_{j} \p{f\st}{\vy_{a,b}, \vs^{i,j}_{a,b}} \Prob{\vs^{i,j}_{a,b}}{\vy_{a,b}}.
 \simeq 
 % {}& \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_{i} \Prob{\vs^i_{a}}{\vy_a} \p{f\st}{\vy_{a,b}, \vs^{i,j}_{a,b}}\nonumber\\
 % = {}&
-\sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_{i} \Prob{\vs^i_{a}}{\vy_a} {}
+\sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_{i} \Prob{\vs^i_{a}}{\vy_a} \\
  \cm{N}\bigl(f\st; \mean{f\st}{\vy_{a,b}, \vs^{i,j}_{a,b}}, \cov{f\st}{\vy_{a,b}, \vs^{i,j}_{a,b}}\bigr).\label{eq:sum_o_Gaussians}
-\end{align}
+\end{multline}
 Before trying to manage these sums, we will determine $p(\vs_b \given \vy_{a,b})$. As before, this distribution gives us the probability
 of the observations $\data_b$ being faulty. For example, if we have
 only a single observation $\data_b$, $
@@ -507,23 +491,25 @@ p\bigl(\fault(\data_b) \given \vy_{a,b}\bigr) = \Prob{\sigma_b =
 K_{b,a} \tilde{V}_a^{-1} \vy_a %\label{eq;ameanba}
 \\
 \acov{\vy_b}{\vy_{a},\vs_b}
-\deq {} & V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b}
- - \amean{\vy_b}{\vy_{a,b}}^2, %\label{eq;acovba}
+\deq {} & V_b - K_{b,a}(\tilde{V}_a^{-1}-\tilde{W}_a^{-1})K_{a,b} \nonumber\\
+ & \hspace{3cm} - \amean{\vy_b}{\vy_{a,b}}^2, %\label{eq;acovba}
 \end{align*}
 where both $\tilde{V}_a$ (or its Cholesky factor) and
 $\tilde{W}_a^{-1}$ were computed previously. By using
 approximations \ref{app:single_gaussian} and \ref{app:independence},
 \begin{align*}
 \Prob{\vs_b}{\vy_{a,b}} & = \frac{\sum_i \p{\vy_b}{\vy_a,\vs^i_{a,b}}p(\vy_a,\vs^i_{a,b})}{p(\vy_{a,b})} 
+\nonumber\\
 % \simeq \frac{\sum_i \p{\vy_b}{\vy_a,\vs^i_{a,b}}\fPr(\vs_a^i\mid{\vy_a})\fPr(\vs_{b})}{\ps{\vy_{b}}{\vy_a}}
-\simeq \frac{\cm{N}\bigl(\vy_b; \amean{\vy_b}{\vy_a}, \acov{\vy_b}{\vy_a, \sigma_b}\bigr) \fPr(\vs_b)}{\p{\vy_{b}}{\vy_a}},%\label{eq:psb}
+& \simeq \frac{\cm{N}\bigl(\vy_b; \amean{\vy_b}{\vy_a}, \acov{\vy_b}{\vy_a, \sigma_b}\bigr) \fPr(\vs_b)}{\p{\vy_{b}}{\vy_a}},%\label{eq:psb}
 \end{align*}
 where we have
 \begin{align*}
 p(\vy_{b} \given \vy_a)
- = \sum_i \sum_j \p{\vy_b}{\vy_a,\vs^i_{a,b}}\Prob{\vs^{i,j}_{a,b}}{\vy_a}
+& = \sum_i \sum_j \p{\vy_b}{\vy_a,\vs^i_{a,b}}\Prob{\vs^{i,j}_{a,b}}{\vy_a}
+\nonumber\\
 % \simeq \sum_i \sum_j \p{\vy_b}{\vy_a,\vs^i_{a,b}}\Prob{\vs_a^i}{\vy_a}\fPr(\vs_{b}^j)
- \simeq \sum_j \cm{N}\bigl(\vy_b; \amean{\vy_b}{\vy_a}, \acov{\vy_b}{\vy_a, \vs_b^j}\bigr) \fPr(\vs_b^j).%\label{eq:likelihood_b}
+&  \simeq \sum_j \cm{N}\bigl(\vy_b; \amean{\vy_b}{\vy_a}, \acov{\vy_b}{\vy_a, \vs_b^j}\bigr) \fPr(\vs_b^j).%\label{eq:likelihood_b}
 \end{align*}
 Note that the product of $p(\vy_{b} \given \vy_a)$ and $p(\vy_a)$ (previously computed in
 \eqref{eq:likelihood_a}) gives the likelihood of our hyperparameters. Now, returning to \eqref{eq:sum_o_Gaussians}, we will once again
@@ -531,7 +517,12 @@ use approximation \ref{app:single_gaussian}. We aim to reuse our previously eval
 $i$ to resolve future sums over $i$. As we gain more data, the
 faultiness of old data becomes less important. We arrive at
 \begin{align*}
-\p{f\st}{\vy_{a,b}} & \simeq \N{f\st}{K_{\star,\{a,b\}} \tilde{V}_{a,b}^{-1} \vy_{a,b}}{K_{\star,\star} - K_{\star,a}(\tilde{V}_{a,b}^{-1}-\tilde{W}_{a,b}^{-1})K_{a,\star} - (K_{\star,\{a,b\}} \tilde{V}_{a,b}^{-1} \vy_{a,b})^2}\,,%\label{eq:pyab}
+&\p{f\st}{\vy_{a,b}} \simeq \cm{N}\bigl(
+f\st;\ 
+K_{\star,\{a,b\}} \tilde{V}_{a,b}^{-1} \vy_{a,b},
+\\ & \hspace{0.1cm}
+K_{\star,\star} - K_{\star,a}(\tilde{V}_{a,b}^{-1}-\tilde{W}_{a,b}^{-1})K_{a,\star} - (K_{\star,\{a,b\}} \tilde{V}_{a,b}^{-1} \vy_{a,b})^2
+\bigr)\,,%\label{eq:pyab}
 \end{align*}
 where we have
 \begin{align*}
@@ -545,17 +536,23 @@ where we have
 \tilde{V}^{-1}_{a,b} \deq {} &
 \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_i \Prob{\vs^i_{a}}{\vy_{a}} (V_{a,b}^{i,j})^{-1} \\
 \tilde{W}^{-1}_{a,b} \deq {} &
-\sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_i \Prob{\vs^i_{a}}{\vy_{a}} (V_{a,b}^{i,j})^{-1}  
+\sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}}\sum_i \Prob{\vs^i_{a}}{\vy_{a}} 
+\\
+& \hspace{3cm}
+(V_{a,b}^{i,j})^{-1}  
  \vy_{a,b}^{\phantom{\tr}} \vy_{a,b}^\tr (V_{a,b}^{i,j})^{-1}.
 \end{align*}
 Now, using the inversion by partitioning formula \citep[Section 2.7]
 {NumericalRecipes},
 \begin{align*}
+&
 ({V}^{i,j}_{a,b})^{-1} =
+\\
+& \hspace{-0.2cm}
 \begin{bmatrix}
  S^{i,j}_a &\hspace{-0.1cm} -S^{i,j}_a K_{a,b} (V^j_b)^{-1} \\
  - (V^j_b)^{-1} K_{b,a} S^{i,j}_a &\hspace{-0.1cm} (V^j_b)^{-1}\!+\!(V^j_b)^{-1} K_{b,a} S^{i,j}_a K_{a,b} (V^j_b)^{-1} 
-\end{bmatrix},
+\end{bmatrix}
 \end{align*}
 where
 $
@@ -627,7 +624,10 @@ $
 then the approximation is valid. With this,
 \begin{align*}
 \tilde{W}^{-1}_{a,b} \simeq
-& \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}} \begin{bmatrix}
+& \sum_{j} \Prob{\vs^j_{b}}{\vy_{a,b}} 
+\\
+& \hspace{0.5cm}
+\begin{bmatrix}
  \tilde{V}_a & K_{a,b}
 \\
  K_{b,a} & V^j_b
@@ -909,7 +909,7 @@ datasets.
 In addition to superior predictive performance, our
 detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates provide a human operator with an indication as to whether more sophisticated analysis is necessary.
 
-\begin{table}
+\begin{table*}
   \centering
   \caption{Quantitative comparison of different algorithms on the
     synthetic datasets.  For each dataset, we show the mean squared error
@@ -935,7 +935,7 @@ detection rates for the faulty points are generally excellent. The results revea
    \scshape{ekf} & 0.060 & $-1.26 \times 10^4$ & 0.551 & 0.258 & 0.613 & $-1.81\times 10^4$ & 0.169 & 0.768 \\
     \bottomrule
   \end{tabular}
-\end{table}
+\end{table*}
 
 \section{Conclusion}
 We have proposed a novel algorithm, the ``fault bucket,'' for managing
@@ -945,10 +945,10 @@ faultiness of observations in a \acro{gp} framework, allowing for
 fast, effective prediction in the presence of unknown faults and the
 simultaneous detection of faulty observations.
 
-\small
+%\small
 \setlength{\parskip}{0\baselineskip}
 \bibliography{fault_bucket_icml_2011}
-\bibliographystyle{unsrt}
+\bibliographystyle{plainnat}
 
 \end{document}
 
