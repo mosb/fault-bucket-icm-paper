@@ -72,8 +72,7 @@
 
 \twocolumn[
 
-\aistatstitle{A Machine-Learning Method for Pattern Detection, Cleaning, and
-Prediction of Environmental Data}
+\aistatstitle{Prediction and Fault Detection of Environmental Signals with Uncharacterised Faults}
 
 \aistatsauthor{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 }
 
@@ -579,8 +578,10 @@ recent observation), or if $\data_b$ and $\data_a$ are simply not
 particularly well correlated. On this basis, we make approximation \ref{app:affine}. Additionally noting that $\sum_i \Prob{\vs^i_{a}}{\vy_{a}} = 1$, we have
 \footnote{
 $\tilde{V}^{-1}_{b|a}$ can be computed using the same trick as in \eqref{eq:inverse_trick} if
-$b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\tilde{V}_{a,b}$ required to solve the linear equations for our predictions can be efficiently determined \citep[Appendix
-  B]{osbornebayesian} using the previously evaluated Cholesky factor of $\tilde{V}_{a}$.
+$b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\tilde{V}_{a,b}$ required to solve the linear equations for our predictions can be efficiently determined 
+\citep{OsborneAnon}
+%\citep[Appendix B]{osbornebayesian} 
+using the previously evaluated Cholesky factor of $\tilde{V}_{a}$.
 }
 \begin{align*}
 \tilde{V}^{-1}_{a,b} &\simeq \sum_j \Prob{\vs^j_{b}}{\vy_{a,b}} \begin{bmatrix}
@@ -683,7 +684,7 @@ If we now receive further data $\data_c$, our existing data is simply treated as
 % \end{algorithmic}
 % \end{algorithm}
 
-An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
+%An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
 
 \subsection{Discussion}
 
@@ -694,8 +695,8 @@ optimising their likelihood on a large training set, giving a
 likelihood close to a delta function. This is not true of the
 hyperparameters $\sigma_n^2$ and $\sigma_f^2$, due to exactly the same
 problematic sums discussed earlier. Instead, we marginalise these
-hyperparameters online using Bayesian Monte Carlo \citep[Chapter
-  7]{osbornebayesian}, taking a fixed set of samples in their values
+hyperparameters online using Bayesian Monte Carlo \citep{BZMonteCarlo, OsborneIPSN}, %\citep[Chapter 7]{osbornebayesian},
+taking a fixed set of samples in their values
 and using the hyperparameter likelihoods $p(\vy_{a,b})$ to construct
 weights over them. Essentially, we proceed as described above
 independently in parallel for each sample, and combine the predictions
@@ -879,14 +880,14 @@ where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\
 A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f^2 \p{\fault}{\vy} + \sigma_n^2 \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
 
 {\bf EPGP:}
-A \acro{gp} with our observation likelihood \eqref{eq:observation_likelihood} and the posterior determined by expectation propagation \cite{minka2001expectation}. Note that expectation propagation will not give us a posterior probability of faultiness, for the purposes of explicitly identifying faults, we use \eqref{eq:thresh}.
+A \acro{gp} with our observation likelihood \eqref{eq:observation_likelihood} and the posterior determined by expectation propagation \citep{minka2001expectation}. Note that expectation propagation will not readily give us a posterior probability of faultiness; for the purposes of explicitly identifying faults, we use \eqref{eq:thresh}.
 
 % \item[ TGP] 
 {\bf TGP:}
 A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f^2$.
 
 {\bf STGP:}
-A \acro{gp} with student-t likelihood; the posterior was determined using a Laplace approximation as per \citet{vanhatalo2009gaussian}. To identify faults, \eqref{eq:thresh} was used.
+A \acro{gp} with student-t likelihood with four degrees of freedom (which was found to optimise performance); the posterior was determined using a Laplace approximation as per \citet{vanhatalo2009gaussian}. To identify faults, \eqref{eq:thresh} was used.
 
 %  \item[ ARGP] An auto-regressive Gaussian process (over the last 10 points), with a point identified as faulty using \eqref{eq:thresh}. If faulty, the value for the observation $y$ is taken as $\mean{y}{\vy}$ for future predictions.
 
@@ -900,7 +901,7 @@ The most likely heteroscedastic  \acro{gp} \citep{kersting2007most}.
 An autoregressive neural net trained with the extended Kalman filter to capture nonstationarity. Again, \eqref{eq:thresh} was used to identify and discard faulty data.
 %\end{description}
 
-Note that for \acro{epgp}, \acro{stgp} and \acro{mlh}, we perform retrospective prediction (so that all data is available to make predictions about even the first predictant), as these methods are usually used. Clearly this allows these approaches an unfair predictive advantage relative to sequential methods. Note also that the multiple passes over the data effected by approximation schemes such as expectation propagation cannot be readily applied to the sequential problem without requiring a great deal of expensive computation. For $N$ observations, the computational cost of expectation propagation is $\mathcal{O}(N^3)$, with a large constant of proportionality, rendering it impractical for real-time problems. With efficient Cholesky factor updates, our scaling is $\mathcal{O}(N^2)$. For this reason, we did not consider even more demanding, non-sequential, expectation propagation approaches such as the twinned \acro{gp} \citep{naish2008robust}.
+Note that for \acro{epgp}, \acro{stgp} and \acro{mlh}, we perform retrospective prediction (so that all data is available to make predictions about even the first predictant), as these methods are usually used. Clearly this allows these approaches an unfair predictive advantage relative to sequential methods. Note also that the multiple passes over the data effected by approximation schemes such as expectation propagation cannot be readily applied to the sequential problem without requiring a great deal of expensive computation. For $N$ observations, the computational cost of expectation propagation is $\mathcal{O}(N^3)$, with a large constant of proportionality, rendering it impractical for real-time problems. With efficient Cholesky factor updates, our scaling is $\mathcal{O}(N^2)$. For this reason, we did not consider even more demanding, non-sequential, expectation propagation approaches such as the twinned \acro{gp} \citep{naish2008robust}. Note also that these approaches do not provide posterior probabilities of faultiness, as our method is able to. 
 
 % TGP: GP in which a pt was flagged as a fault if |pt - p4Mean| > thresh
 % XnGP: GP in which we exhaustively search over the faultiness of the last n pts, and approximate the noise variance of all previous points as having the value sigma_f p(fault|D) + sigma_n p(not fault|D), fixed at the time the point was observed (when data D was available). XnGP is more computationally expensive than FB (roughly 2^n times more)
@@ -921,7 +922,7 @@ datasets.
 % The performance is remarkably better under mean-squared
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
-detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates provide a human operator with an indication as to whether more sophisticated analysis is necessary.
+detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates of faultiness provide a human operator with an indication as to whether more sophisticated analysis is necessary.
 
 \begin{table*}
   \centering
@@ -941,12 +942,12 @@ detection rates for the faulty points are generally excellent. The results revea
 & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
 \midrule
     \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & \textbf{0.829} & {0.016} \\
-    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & \textbf{0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & \textbf{0.012} \\
-\scshape{epgp} & 0.880 & $-3.39 \times 10^3$ & 0.000 & 0.000 
-	       & 2.179 & $-1.43 \times 10^4$ & 0.000 & 0.000 \\ 
+    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & \textbf{0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & 0.012 \\
+\scshape{epgp} & 0.879 & $-5.06 \times 10^3$ & 0.009 & 0.025 
+	       & 2.179 & $-2.14 \times 10^4$ & 0.000 & \textbf{0.000} \\ 
     \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & \textbf{0.829} & 0.083 \\
-   \scshape{stgp} & 0.939 & $-2.49 \times 10^5$ & 0.027 & 0.025 &
-		  0.375 & $-1.08 \times 10^5$ & 0.689 & 0.005\\
+   \scshape{stgp} & 0.189 & $-604$ & 0.994 & 0.255 &
+		  0.249 & $-1.01\times 10^3$ & 0.787 & 0.140\\
 %    \scshape{argp} & 2.340 & $-1.93 \times 10^9$ & 0.6 & 0.4 & 1.097 & $-7.52\times 10^8$ & 0.178 & 0.822 \\
     \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.045 & 0.262 \\
 %    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 & 0.360 & $-3.54 \times 10^4$ & 0.835 & 0.046 \\
