@@ -1,5 +1,15 @@
-\documentclass[twoside]{article}
-\usepackage{aistats2012}
+%File: formatting-instruction.tex
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+\frenchspacing
+\pdfinfo{
+/Title (Formatting Instructions for Authors Using LaTeX)
+/Subject (AAAI Publications)
+/Author (AAAI Press)}
+\setcounter{secnumdepth}{0}  
 
 %\usepackage[letterpaper]{geometry}
 \usepackage{graphicx}
@@ -70,13 +80,11 @@
 
 \begin{document}
 
-\twocolumn[
 
-\aistatstitle{Prediction and Fault Detection of Environmental Signals with Uncharacterised Faults}
 
-\aistatsauthor{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 }
+\title{Prediction and Fault Detection of Environmental Signals with Uncharacterised Faults}
 
-\aistatsaddress{ Unknown Institution 1 \And Unknown Institution 2 \And Unknown Institution 3 } ]
+\author{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3}
 
 % \aistatsauthor{ Michael Osborne \And Anonymous Author 2 \And Anonymous Author 3 }
 % 
@@ -90,9 +98,11 @@
 % \icmladdress{$^\dagger$Department of Computer Science, Carnegie Mellon University \vspace{-10pt}}
 % \icmladdress{$^\ddagger$Aquatic Informatics \vspace{-10pt}}
 % \icmladdress{$^\text{\S}$Department of Computer Science, University of British Columbia}
+\maketitle
 
 \begin{abstract}
-Many signals of interest are corrupted by faults of an unknown
+\begin{quote}
+ Many signals of interest are corrupted by faults of an unknown
 type. We propose an approach that uses Gaussian processes and a
 general ``fault bucket'' to capture \textit{a priori} uncharacterised
 faults, along with an approximate method for marginalising the
@@ -104,6 +114,7 @@ detection, correction, and prediction problems. The method works well
 despite the fact that the data is plagued with numerous difficulties,
 including missing observations, multiple discontinuities,
 non-stationarity, nonlinearity and many unanticipated types of fault.
+\end{quote}
 \end{abstract}
 
 \section{Introduction}
