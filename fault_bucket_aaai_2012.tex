@@ -4,6 +4,7 @@
 \usepackage{times}
 \usepackage{helvet}
 \usepackage{courier}
+\usepackage{comment}
 \frenchspacing
 \pdfinfo{
 /Title (Formatting Instructions for Authors Using LaTeX)
@@ -118,6 +119,20 @@ non-stationarity, nonlinearity and many unanticipated types of fault.
 \end{abstract}
 
 \section{Introduction}
+
+
+Water sustainability is one of the most significant issues that humanity faces. Water is essential for life,
+but it also has a massive impact on the economy, affecting industries
+such as agriculture, mining, power, and more. Population and industrial growth, along with climate change, are beginning to stress
+water supplies. Between 1994 and 1999, 26\% of Canadian municipalities reported water shortages despite the fact that Canada
+contains 9\% of the world's renewable water supply (http://atlas.nrcan.gc.ca/site/english/maps/freshwater/1).
+
+One of the keys to effective water sustainability involves proper monitoring and analysis. Water is not distributed evenly in space
+and time, and being able to measure, predict, and respond to changes in the water supply will allow organizations to allocate supplies
+to where they are needed most. To this end, organizations such as Water Survey Canada (WSC) and the United States Geological Survey (USGS)
+have set up around 11,000 monitoring stations across North America, many of them reporting telemetry data in real-time. Analyzing this
+ever-increasing amount of data by hand is difficult, costly, and time-consuming; there are many opportunities for Machine Learning
+to automate this process in order to significantly improve the efficiency and effectiveness of current water-management systems.
 
 Water sustainability is one of the greatest challenges that humankind
 faces. It is also a problem to which the machine-learning community
@@ -411,6 +426,31 @@ $j$. We now define the covariances
 %\end{align*}
 where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. 
 
+ We now use approximation \ref{app:single_gaussian}. It is our hope that our predictions
+for $f\st$ are not so sensitive to the noise in our observations that
+all the Gaussians in this sum become dramatically different. In any
+case, the quality of this approximation will improve over time---if
+$f\st$ is far removed from our old data $\data_a$, then our
+predictions really will not be very sensitive to $\sigma_a$. 
+
+To progress, we make approximation \ref{app:independence}; we assume that faults will not persist longer than $|\data_b|$. To be precise, we assume
+\begin{equation} \label{eq:approx}
+p(\vs^{i,j}_{a,b},\vy_{a,b})  \simeq p(\vs^i_{a})\,\Prob{\vy_a}{\vs^i_{a}}\,
+%P
+p(\vs^j_{b})\,\p{\vy_b}{\vs^{i,j}_{a,b},\vy_{a}}
+\end{equation}
+
+$({V}^{i,j}_{a,b})^{-1}$ is effectively affine in $(V^i_a)^{-1}$. This
+is true if given $\data_b$, it is impossible to accurately predict
+$\data_a$. This might be the case if $\data_a$ represents a lot of
+information relative to $\data_b$ (if, for example, $\data_a$ is our
+entire history of observations where $\data_b$ is simply the most
+recent observation), or if $\data_b$ and $\data_a$ are simply not
+particularly well correlated. On this basis, we make approximation \ref{app:affine}.
+
+\begin{comment}
+
+
 To initialise our algorithm, imagine that $a$ identifies a small set
 of data, such that we can readily compute the likelihood of our hyperparameters
 \begin{equation}
@@ -662,41 +702,41 @@ If we now receive further data $\data_c$, our existing data is simply treated as
 % and we can solve for
 % $K_{\star,(a,b)}\tilde{W}^{-1}_{a,b}K_{(a,b),\star}$ by efficiently
 % updating using the previously computed quantity $\tilde{T}_{a}$.
+\end{comment}
 
-% \begin{algorithm}[tb]
-%    \caption{Fault Bucket}
-% \label{alg:fault_bucket}
-% \begin{algorithmic}
-%    \STATE {\bfseries input:} data $(\vx,\vy)$, lookahead $\delta$
-% \STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
-% \,x\st \leftarrow x_{1+\delta}$
-% \\
-% \STATE {\bfseries return:} $p(\vy_a) \leftarrow$\eqref{eq:likelihood_a}
-% \FOR {$i = 0,1$}
-% \STATE {\bfseries return:} $\Prob{\vs^i_a}{\vy_{a}} \leftarrow$ \eqref{eq:psa}\\
-% \ENDFOR
-%  \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $\tilde{W}^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
-%  \STATE $\amean{f\st}{\vy_a} \leftarrow$ \eqref{eq:ameana}, $\acov{f\st}{\vy_a} \leftarrow$ \eqref{eq:acova}\\
-% \STATE {\bfseries return:} $\p{f\st}{\vy_{a}} \leftarrow$ \eqref{eq:pya}\\
-% \FOR {$t = 2,\ldots$}
-% \STATE $x_b \leftarrow x_t, z_b \leftarrow z_t, x\st \leftarrow x_{t+\delta}$\\
-% \STATE $\amean{\vy_b}{\vy_a} \leftarrow$ \eqref{eq;ameanba}, $\acov{\vy_b}{\vy_a} \leftarrow$ \eqref{eq;acovba}\\
-% \STATE $\p{\vy_b}{\vy_a} \leftarrow$ \eqref{eq:likelihood_b}\\
-% \FOR {$j = 0,1$}
-% \STATE {\bfseries return:} $\Prob{\vs^j_b}{\vy_{a,b}} \leftarrow$ \eqref{eq:psb}\\
-% \ENDFOR
-% \STATE $\tilde{R}_{a,b} \leftarrow$ \eqref{eq:Rab}, $\tilde{T}_{a,b}\leftarrow$ \eqref{eq:Tab}, \, $\tilde{W}^{-1}_{a,b} \leftarrow$ \eqref{eq:Wab}\\
-%  \STATE $\amean{f\st}{\vy_{a,b}} \leftarrow$ \eqref{eq:ameanab}, $\acov{f\st}{\vy_{a,b}} \leftarrow$ \eqref{eq:acovab}\\
-% \STATE {\bfseries return:} $\p{f\st}{\vy_{a,b}}\leftarrow$ \eqref{eq:pyab}\\
-% \STATE {\bfseries return:} $p(\vy_a) \leftarrow p(\vy_a)\p{\vy_b}{\vy_a}$
-% \STATE $x_a \leftarrow \{x_a,x_b\},\, z_a \leftarrow \{z_a,z_b\}$\\
-% \STATE $\tilde{R}_a \leftarrow \tilde{R}_{a,b},\, \tilde{T}_a\leftarrow \tilde{T}_{a,b}$\\
-% \ENDFOR 
-% \end{algorithmic}
-% \end{algorithm}
+\begin{algorithm}[tb]
+   \caption{Fault Bucket}
+\label{alg:fault_bucket}
+\begin{algorithmic}
+   \STATE {\bfseries input:} data $(\vx,\vy)$, lookahead $\delta$
+\STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
+\,x\st \leftarrow x_{1+\delta}$
+\\
+\STATE {\bfseries return:} $p(\vy_a) \leftarrow$\eqref{eq:likelihood_a}
+\FOR {$i = 0,1$}
+\STATE {\bfseries return:} $\Prob{\vs^i_a}{\vy_{a}} \leftarrow$ \eqref{eq:psa}\\
+\ENDFOR
+ \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $\tilde{W}^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
+ \STATE $\amean{f\st}{\vy_a} \leftarrow$ \eqref{eq:ameana}, $\acov{f\st}{\vy_a} \leftarrow$ \eqref{eq:acova}\\
+\STATE {\bfseries return:} $\p{f\st}{\vy_{a}} \leftarrow$ \eqref{eq:pya}\\
+\FOR {$t = 2,\ldots$}
+\STATE $x_b \leftarrow x_t, z_b \leftarrow z_t, x\st \leftarrow x_{t+\delta}$\\
+\STATE $\amean{\vy_b}{\vy_a} \leftarrow$ \eqref{eq;ameanba}, $\acov{\vy_b}{\vy_a} \leftarrow$ \eqref{eq;acovba}\\
+\STATE $\p{\vy_b}{\vy_a} \leftarrow$ \eqref{eq:likelihood_b}\\
+\FOR {$j = 0,1$}
+\STATE {\bfseries return:} $\Prob{\vs^j_b}{\vy_{a,b}} \leftarrow$ \eqref{eq:psb}\\
+\ENDFOR
+\STATE $\tilde{R}_{a,b} \leftarrow$ \eqref{eq:Rab}, $\tilde{T}_{a,b}\leftarrow$ \eqref{eq:Tab}, \, $\tilde{W}^{-1}_{a,b} \leftarrow$ \eqref{eq:Wab}\\
+ \STATE $\amean{f\st}{\vy_{a,b}} \leftarrow$ \eqref{eq:ameanab}, $\acov{f\st}{\vy_{a,b}} \leftarrow$ \eqref{eq:acovab}\\
+\STATE {\bfseries return:} $\p{f\st}{\vy_{a,b}}\leftarrow$ \eqref{eq:pyab}\\
+\STATE {\bfseries return:} $p(\vy_a) \leftarrow p(\vy_a)\p{\vy_b}{\vy_a}$
+\STATE $x_a \leftarrow \{x_a,x_b\},\, z_a \leftarrow \{z_a,z_b\}$\\
+\STATE $\tilde{R}_a \leftarrow \tilde{R}_{a,b},\, \tilde{T}_a\leftarrow \tilde{T}_{a,b}$\\
+\ENDFOR 
+\end{algorithmic}
+\end{algorithm}
 
-%An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
-
+An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
 \subsection{Discussion}
 
 We return to the management of our hyperparameters
