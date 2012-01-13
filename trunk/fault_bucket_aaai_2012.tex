@@ -125,21 +125,16 @@ Water sustainability is one of the most significant issues that humanity faces. 
 but it also has a massive impact on the economy, affecting industries
 such as agriculture, mining, power, and more. Population and industrial growth, along with climate change, are beginning to stress
 water supplies. Between 1994 and 1999, 26\% of Canadian municipalities reported water shortages despite the fact that Canada
-contains 9\% of the world's renewable water supply (http://atlas.nrcan.gc.ca/site/english/maps/freshwater/1).
+contains 9\% of the world's renewable water supply\footnote{ http://atlas.nrcan.gc.ca/site/english/maps/freshwater/1}.
 
 One of the keys to effective water sustainability involves proper monitoring and analysis. Water is not distributed evenly in space
 and time, and being able to measure, predict, and respond to changes in the water supply will allow organizations to allocate supplies
-to where they are needed most. To this end, organizations such as Water Survey Canada (WSC) and the United States Geological Survey (USGS)
+to where they are needed most. To this end, organizations such as Water Survey Canada (\acro{WSC}) and the United States Geological Survey (\acro{USGS})
 have set up around 11,000 monitoring stations across North America, many of them reporting telemetry data in real-time. Analyzing this
 ever-increasing amount of data by hand is difficult, costly, and time-consuming; there are many opportunities for Machine Learning
 to automate this process in order to significantly improve the efficiency and effectiveness of current water-management systems.
 
-Water sustainability is one of the greatest challenges that humankind
-faces. It is also a problem to which the machine-learning community
-can make positive, significant contributions. Water sustainability
-begins with proper water monitoring, which requires the analysis and
-interpretation of vast amounts of environmental data
-\citep{wagner2006guidelines}. In this paper, we attack the problem of
+In this paper, we attack the problem of
 fault detection, correction, and prediction in water monitoring
 signals.  Here measurements are often corrupted in non-trivial ways by
 various intermittent faulty sensing and communication mechanisms,
@@ -310,7 +305,7 @@ $
  ( \bm{x}, \bm{y} )
 $,
 the posterior distribution (itself given by a Gaussian Process) of $f\st \deq f(x\st)$ given these data is
-\begin{equation*}
+\begin{equation}\label{eq:GP_posterior}
  p(f\st \given \vy, \theta)
  =
  \cm{N}
@@ -319,7 +314,7 @@ the posterior distribution (itself given by a Gaussian Process) of $f\st \deq f(
    \mean{f\st}{\vy,\theta},
    \cov{f\st}{\vy,\theta}
  \bigr),
-\end{equation*}
+\end{equation}
 where the posterior mean and covariance are
 \begin{align*}
  &
@@ -400,53 +395,62 @@ about the faultiness of all available observations is a
 challenging task. With $N$ observations, there are $2^N$
 possible assignments of faultiness; it is infeasible to consider them all.
 
-Our solution is founded upon approximation \ref{app:single_gaussian}. 
-For time series, the value to be predicted $f\st$
-typically lies in the future, and old observations are
-typically less pertinent for this task than new ones. We hence approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian.
-We prefer this approximate marginalisation over
+Our solution is founded upon approximation \ref{app:single_gaussian}. We approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian. This natural approach is similar to that taken in the related field of switching Kalman filters \citep{murphy1998switching}. We prefer this approximate marginalisation over
 faultiness to heuristics that would designate all
 observations as either faulty or not---we acknowledge our
-uncertainty about faultiness.
+uncertainty about faultiness. 
 
-More formally, imagine that we have partitioned our observations
+More formally, define $\vs$ to be the (unknown) vector of
+all noise variances at observations $\vy$. Because we have to sum over all possible values for these
+vectors, we will index the possible values of
+$\vs$ by $i$, each given by a different combination of
+faultiness over $\data$.
+Given all data $\data$, we need to marginalise over predictions indexed by $i$, as per
+\begin{align}
+& \p{f\st}{\vy} \nonumber\\
+& = \sum_{i} \Prob{\vs^i}{\vy} \p{f\st}{\vy, \vs^{i}} \nonumber\\
+& =\sum_{i} \Prob{\vs^i}{\vy} \cm{N}\bigl(f\st; \mean{f\st}{\vy, \vs^{i}}, \cov{f\st}{\vy, \vs^{i}}\bigr),\label{eq:Gaussian_marginal}
+\end{align}
+the weighted sum of Gaussian predictions made using the different
+possible values for $\vs$. By moment-matching, we collapse the weighted sum of all these predictions to a single Gaussian prediction. 
+
+In order to build a sequential algorithm, imagine that we have partitioned our observations
 $\data_{a,b}$ into a set of old observations
 $\data_a\deq(\vx_a,\vy_a)$ and a set of new observations $\data_b
-\deq (\vx_b,\vy_b)$. Define $\vs_{a}$ to be the (unknown) vector of
-all noise variances at observations $\vy_{a}$, and define $\vs_{b}$
-similarly. Because we have to sum over all possible values for these
-vectors, we will index the possible values of
-$\vs_{a}$ by $i$ (each given by a different combination of
-faultiness over $\data_a$) and the values of $\vs_{b}$ similarly by
-$j$. We now define the covariances
+\deq (\vx_b,\vy_b)$. We will index the possible values of
+$\vs_{a}$ by $i$ and the values of $\vs_{b}$ similarly by
+$j$. We now define the covariance matrices over our data
 %\begin{align*}
  $V_a^i  \deq K_{a,a} + \diag \vs_{a}^i$,
  $V_b^j  \deq K_{b,b} + \diag \vs_{b}^j$ and
  $V_{a,b}^{i,j} \deq K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\}$,
 %\end{align*}
-where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. 
+where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. Our approach relies upon storing quantities derived from sums over $i$, and then effecting simple updates in order to arrive at sums over both $i$ and $j$. Hence our approximate marginalisation from previous time steps can be efficiently used to determine an approximate marginalisation for the current time step. 
 
- We now use approximation \ref{app:single_gaussian}. It is our hope that our predictions
-for $f\st$ are not so sensitive to the noise in our observations that
-all the Gaussians in this sum become dramatically different. In any
-case, the quality of this approximation will improve over time---if
-$f\st$ is far removed from our old data $\data_a$, then our
-predictions really will not be very sensitive to $\sigma_a$. 
+% It is our hope that our predictions
+% for $f\st$ are not so sensitive to the noise in our observations that
+% all our Gaussian predictions, one become dramatically different. In any
+% case, the quality of this approximation will improve over time---if
+% $f\st$ is far removed from our old data $\data_a$, then our
+% predictions really will not be very sensitive to $\sigma_a$. 
 
-To progress, we make approximation \ref{app:independence}; we assume that faults will not persist longer than $|\data_b|$. To be precise, we assume
+This approach firstly relies upon approximation \ref{app:independence}; we assume that faults will not persist longer than $|\data_b|$. To be precise, we assume
 \begin{equation} \label{eq:approx}
 p(\vs^{i,j}_{a,b},\vy_{a,b})  \simeq p(\vs^i_{a})\,\Prob{\vy_a}{\vs^i_{a}}\,
 %P
 p(\vs^j_{b})\,\p{\vy_b}{\vs^{i,j}_{a,b},\vy_{a}}
 \end{equation}
 
+From \eqref{eq:GP_posterior}, we know each of the Gaussians in the sum \eqref{eq:Gaussian_marginal} has relatively simple dependence upon the inverse of $V_a^i$, the precision. We can hence render our analysis anlytic if we make approximation \ref{app:affine}, assuming that
 $({V}^{i,j}_{a,b})^{-1}$ is effectively affine in $(V^i_a)^{-1}$. This
 is true if given $\data_b$, it is impossible to accurately predict
 $\data_a$. This might be the case if $\data_a$ represents a lot of
 information relative to $\data_b$ (if, for example, $\data_a$ is our
 entire history of observations where $\data_b$ is simply the most
 recent observation), or if $\data_b$ and $\data_a$ are simply not
-particularly well correlated. On this basis, we make approximation \ref{app:affine}.
+particularly well correlated. 
+
+The laborious mathematical details of the derivation of the fast, online algorithm built upon these assumptions is omitted for clarity. An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
 
 \begin{comment}
 
@@ -710,11 +714,13 @@ If we now receive further data $\data_c$, our existing data is simply treated as
 \begin{algorithmic}
    \STATE {\bfseries input:} data $(\vx,\vy)$, lookahead $\delta$
 \STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
-\,x\st \leftarrow x_{1+\delta}$
+\,x\st \leftarrow x_{1+\delta}$, fault prior $\pi$.
 \\
-\STATE {\bfseries return:} $p(\vy_a) \leftarrow$\eqref{eq:likelihood_a}
+\STATE {\bfseries return:} $p(\vy_a) \leftarrow$
+\acro{data-likelihood-gp$(z_a)$}\\
 \FOR {$i = 0,1$}
-\STATE {\bfseries return:} $\Prob{\vs^i_a}{\vy_{a}} \leftarrow$ \eqref{eq:psa}\\
+\STATE {\bfseries return:} $\Prob{\vs^i_a}{\vy_{a}} \leftarrow$ 
+\acro{fault-posterior$\bigl(p(\vy_a), \pi\bigr)$}\\
 \ENDFOR
  \STATE $\tilde{R}_a \leftarrow$ \eqref{eq:Ra}, $\tilde{T}_a\leftarrow$ \eqref{eq:Ta}, \, $\tilde{W}^{-1}_a \leftarrow$ \eqref{eq:Wa}\\
  \STATE $\amean{f\st}{\vy_a} \leftarrow$ \eqref{eq:ameana}, $\acov{f\st}{\vy_a} \leftarrow$ \eqref{eq:acova}\\
@@ -736,7 +742,7 @@ If we now receive further data $\data_c$, our existing data is simply treated as
 \end{algorithmic}
 \end{algorithm}
 
-An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
+
 \subsection{Discussion}
 
 We return to the management of our hyperparameters
