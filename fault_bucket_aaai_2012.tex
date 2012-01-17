@@ -13,12 +13,12 @@
 \setcounter{secnumdepth}{0}  
 
 %\usepackage[letterpaper]{geometry}
-\usepackage{graphicx}
+ \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{url}
 
-\usepackage{hyperref}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 \usepackage{xcolor}
@@ -28,11 +28,10 @@
 \usepackage{psfrag}
 \usepackage{amsmath}
 \usepackage{amssymb}
-%\usepackage[T1]{fontenc}
+\usepackage[T1]{fontenc}
 \usepackage{nicefrac}
 \usepackage{booktabs}
 
-\usepackage{natbib}
 
 \newcommand{\psff}[1]{\input{#1.tex}\includegraphics{#1.eps}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
@@ -72,11 +71,12 @@
 \newcommand{\fix}{\marginpar{FIX}}
 \newcommand{\new}{\marginpar{NEW}}
 
-\usepackage{usbib}
-\bibliographystyle{myusmeg-a}
-\renewcommand{\citenamefont}[1]{\textsc{\MakeLowercase{#1}}}
-\renewcommand{\bibnamefont}[1]{\textsc{#1}}
-\renewcommand*{\bibname}{biblography}
+\newcommand{\citet}[1]{\citeauthor{#1} (\citeyear{#1})}
+
+% \usepackage{usbib}
+% \renewcommand{\citenamefont}[1]{\textsc{\MakeLowercase{#1}}}
+% \renewcommand{\bibnamefont}[1]{\textsc{#1}}
+% \renewcommand*{\bibname}{biblography}
 
 
 
@@ -86,7 +86,7 @@
 
 \title{Prediction and Fault Detection of Environmental Signals with Uncharacterised Faults}
 
-\author{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3}
+\author{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 \And Anonymous Author 4}
 
 % \aistatsauthor{ Michael Osborne \And Anonymous Author 2 \And Anonymous Author 3 }
 % 
@@ -124,14 +124,14 @@ non-stationarity, nonlinearity and many unanticipated types of fault.
 
 Water sustainability is one of the most significant issues that humanity faces. Water is essential for life,
 but it also has a massive impact on the economy, affecting industries
-such as agriculture, mining, power, and more. Population and industrial growth, along with climate change, are beginning to stress
+including agriculture, mining and power. Population and industrial growth, along with climate change, are beginning to stress
 water supplies. Between 1994 and 1999, 26\% of Canadian municipalities reported water shortages despite the fact that Canada
-contains 9\% of the world's renewable water supply\footnote{ http://atlas.nrcan.gc.ca/site/english/maps/freshwater/1}.
+contains 9\% of the world's renewable water supply \cite{atlas_canada}.
 
 One of the keys to effective water sustainability involves proper monitoring and analysis. Water is not distributed evenly in space
 and time, and being able to measure, predict, and respond to changes in the water supply will allow organizations to allocate supplies
 to where they are needed most. To this end, organizations such as Water Survey Canada (\acro{WSC}) and the United States Geological Survey (\acro{USGS})
-have set up around 11,000 monitoring stations across North America, many of them reporting telemetry data in real-time. Analyzing this
+have set up around 11,000 monitoring stations across North America \cite{wagner2006guidelines}, many of them reporting telemetry data in real-time. Analyzing this
 ever-increasing amount of data by hand is difficult, costly, and time-consuming; there are many opportunities for Machine Learning
 to automate this process in order to significantly improve the efficiency and effectiveness of current water-management systems.
 
@@ -179,8 +179,7 @@ drastically if they are taken in different regions.
 
 The collection of literature on fault- (also known as novelty-, anomaly-
 and one-class-) detection is vast
-\cite{Eciolaza2001, deFreitas1996,
- Isermann2005, Ding2008,Markou2003,Chandola:2009,Khan2010,Dereszynski}.
+\cite{Eciolaza2001,deFreitas1996,Isermann2005,Ding2008,Markou2003,Chandola:2009,Khan2010,Dereszynski}.
 Unfortunately, the problems solved by most of these techniques are of
 very different character to our own, rendering such techniques
 inapplicable. Further, after
@@ -201,14 +200,13 @@ able to perform effective prediction for the latent process even in
 the presence of faults.
 
 Our proposed method will rely on Gaussian processes (\acro{gp}s) due
-to their flexibility and widely demonstrated effectiveness at modeling
-nonlinear distributions. \acro{gp}s have been used previously for
-fault detection in \citep{Eciolaza2001}, but in a very different
+to their flexibility and widely demonstrated effectiveness. \acro{gp}s have been used previously for
+fault detection in \cite{Eciolaza2001}, but in a very different
 context, unsuitable for our problem. Previous work along similar lines
 has approached this problem by creating observation models that
 specify
 the anticipated potential fault types \textit{a priori}
-\citep{garnettosborne}, but this is usually an unreasonable assumption
+\cite{garnettosborne}, but this is usually an unreasonable assumption
 in highly variable or poorly understood environments. 
 In our proposed  ``fault bucket'' approach, each point is considered
 to have been generated from either a nominal or generic faulty process; we do not require the specification of precise fault models. In
@@ -217,7 +215,7 @@ make predictions in the presence of sensor faults.
 % Since we cannot
 % make any strong assumptions about the nature of the faults, we model
 % the faulty process as a distribution with extremely high variance.
-The result is a fast and efficient method for data-stream prediction
+The result is a fast, efficient method for data-stream prediction
 that can manage a
 wide range of faults without requiring significant
 domain-specific knowledge.
@@ -243,7 +241,7 @@ domain-specific knowledge.
 \section{Gaussian Processes}
 
 Gaussian processes provide a simple, flexible framework for performing
-Bayesian inference about functions \citep{gpml}.  A Gaussian process
+Bayesian inference about functions \cite{gpml}.  A Gaussian process
 is a distribution on the functions $f\colon \cm{X} \to \R$ (on an
 arbitrary domain $\cm{X}$) with the property that the distribution of
 the function values at a finite subset of points $F \subseteq \cm{X}$
@@ -360,7 +358,7 @@ We propose an algorithm that is designed to deal with faults of many different, 
 \item \label{app:independence} {\bf Old/new noise independence:} We assume that noise contributions are independent, and that the contributions for new data are independent of old observations.
 \item \label{app:affine} {\bf Affine precision:} The precision matrix over both old and new halves is assumed to be affine in the precision matrix over the old half.
 \end{enumerate}
-Approximation \ref{app:fb} represents the state-of-the-art \cite{Dereszynski}. However, using it alone will not give an algorithm that can scale to the real-time problems we consider. Our novel approximations \ref{app:single_gaussian}-\ref{app:affine} permit very fast, fault-tolerant inference. We will detail and justify these approximations further below.
+Approximations \ref{app:fb} and \ref{app:single_gaussian} represent the state-of-the-art \cite{Dereszynski}. However, using them alone will not give an algorithm that can scale to the real-time problems we consider. Our novel approximations \ref{app:independence}-\ref{app:affine} permit very fast, fault-tolerant inference. We will detail and justify these approximations further below.
 
 Our single, catch-all, ``fault bucket'' is expressed by approximation \ref{app:fb}. It is built upon the expectation that points that are more likely to have been generated by noise with wide variance than under the normal
 predictive model of the \acro{gp} can reasonably be assumed to
@@ -396,7 +394,7 @@ about the faultiness of all available observations is a
 challenging task. With $N$ observations, there are $2^N$
 possible assignments of faultiness; it is infeasible to consider them all.
 
-Our solution is founded upon approximation \ref{app:single_gaussian}. We approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian. This natural approach is similar to that taken in the related field of switching Kalman filters \citep{murphy1998switching}. We prefer this approximate marginalisation over
+Our solution is founded upon approximation \ref{app:single_gaussian}. We approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian. This natural approach is similar to that taken in the related field of switching Kalman filters \cite{murphy1998switching}. We prefer this approximate marginalisation over
 faultiness to heuristics that would designate all
 observations as either faulty or not---we acknowledge our
 uncertainty about faultiness. 
@@ -426,7 +424,9 @@ $j$. We now define the covariance matrices over our data
  $V_b^j  \deq K_{b,b} + \diag \vs_{b}^j$ and
  $V_{a,b}^{i,j} \deq K_{\{a,b\},\{a,b\}} + \diag \{\vs_{a}^i,\vs_{b}^j\}$,
 %\end{align*}
-where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. Our approach relies upon storing quantities derived from sums over $i$, and then effecting simple updates in order to arrive at sums over both $i$ and $j$. Hence our approximate marginalisation from previous time steps can be efficiently used to determine an approximate marginalisation for the current time step. 
+where $\diag \vs$ is the diagonal matrix with diagonal $\vs$. From \eqref{eq:GP_posterior}, we know that our predictions have relatively simple dependence upon the inverse of $V$, the precision. To approximate \eqref{eq:Gaussian_marginal} as a single Gaussian, a simple calculation reveals that we require\footnote{Actually, with some rearrangement, we can avoid explicitly computing (unstable) matrix
+inverses and instead work with Cholesky factors to solve the required linear equations.} the expected values of $V^{-1}$ and $V^{-1}y y^\tr V^{-1}$, expectations with respect to $\Prob{\vs^i}{\vy}$.  
+We'll refer to the set of those two expected values (which are matrices) as the \emph{marginal set}, which, given $\data_a$, we denote as $M_a$. Our approach relies upon storing $M_a$, and then performing simple updates in order to arrive at $M_{a,b}$, the marginal set given $\data_{a,b}$. Hence our approximate marginalisation from previous time steps can be efficiently used to determine an approximate marginalisation for the current time step. 
 
 % It is our hope that our predictions
 % for $f\st$ are not so sensitive to the noise in our observations that
@@ -441,17 +441,16 @@ p(\vs^{i,j}_{a,b},\vy_{a,b})  \simeq p(\vs^i_{a})\,\Prob{\vy_a}{\vs^i_{a}}\,
 %P
 p(\vs^j_{b})\,\p{\vy_b}{\vs^{i,j}_{a,b},\vy_{a}}
 \end{equation}
-
-From \eqref{eq:GP_posterior}, we know each of the Gaussians in the sum \eqref{eq:Gaussian_marginal} has relatively simple dependence upon the inverse of $V_a^i$, the precision. We can hence render our analysis anlytic if we make approximation \ref{app:affine}, assuming that
+This simplifies the expectations required to evaluate $M_{a,b}$. A further simplification is afforded by approximation \ref{app:affine}, in which we assume that
 $({V}^{i,j}_{a,b})^{-1}$ is effectively affine in $(V^i_a)^{-1}$. This
 is true if given $\data_b$, it is impossible to accurately predict
 $\data_a$. This might be the case if $\data_a$ represents a lot of
 information relative to $\data_b$ (if, for example, $\data_a$ is our
 entire history of observations where $\data_b$ is simply the most
 recent observation), or if $\data_b$ and $\data_a$ are simply not
-particularly well correlated. 
+very well correlated. Together, approximations \ref{app:independence} and \ref{app:affine} allow us the efficient updates to $M$ required to build an online algorithm.
 
-The laborious mathematical details of the derivation of the fast, online algorithm built upon these assumptions is omitted for clarity. An outline of our approach is depicted in Algorithm \ref{alg:fault_bucket}.
+The further laborious mathematical details of the derivation of our algorithm are omitted for clarity. An outline of our approach is depicted in algorithm \ref{alg:fault_bucket}.
 
 \begin{comment}
 
@@ -606,7 +605,7 @@ where we have
 (V_{a,b}^{i,j})^{-1}  
  \vy_{a,b}^{\phantom{\tr}} \vy_{a,b}^\tr (V_{a,b}^{i,j})^{-1}.
 \end{align*}
-Now, using the inversion by partitioning formula \citep[Section 2.7]
+Now, using the inversion by partitioning formula \cite[Section 2.7]
 {NumericalRecipes},
 \begin{align*}
 &
@@ -635,8 +634,8 @@ particularly well correlated. On this basis, we make approximation \ref{app:affi
 \footnote{
 $\tilde{V}^{-1}_{b|a}$ can be computed using the same trick as in \eqref{eq:inverse_trick} if
 $b$ identifies a single observation and $j\in\{0,1\}$. The Cholesky factor of $\tilde{V}_{a,b}$ required to solve the linear equations for our predictions can be efficiently determined 
-\citep{OsborneAnon}
-%\citep[Appendix B]{osbornebayesian} 
+\cite{OsborneAnon}
+%\cite[Appendix B]{osbornebayesian} 
 using the previously evaluated Cholesky factor of $\tilde{V}_{a}$.
 }
 \begin{align*}
@@ -713,34 +712,39 @@ If we now receive further data $\data_c$, our existing data is simply treated as
    \caption{Fault Bucket}
 \label{alg:fault_bucket}
 \begin{algorithmic}
-   \STATE {\bfseries input:} data $(\vx,\vy)$, lookahead $\delta$
-\STATE $x_a \leftarrow x_1,\, z_a \leftarrow z_1,
-\,x\st \leftarrow x_{1+\delta}$, fault prior $\pi$.
+   \STATE {\bfseries input:} data $(\vx,\vy)$, lookahead $\delta$, fault prior $\pi$.
+\STATE $x_a \leftarrow x_1,\, y_a \leftarrow y_1,
+\,x\st \leftarrow x_{1+\delta}$
 \\
-\STATE {\bfseries return:} $p(\vy_a) \leftarrow$
-\acro{data-likelihood-gp$(z_a, \pi)$}\\
+\STATE {\bfseries return:} $p(y_a) \leftarrow$\\
+\hfill\acro{marginal-gp-predictions}$(y_a, x_a, \pi)$\\
 \FOR {$i = 0,1$}
-\STATE {\bfseries return:} $\Prob{\vs^i_a}{\vy_{a}} \leftarrow$ 
-\acro{fault-posterior$\bigl(p(\vy_a), \pi\bigr)$}\\
+\STATE {\bfseries return:} $\Prob{\vs^i_a}{y_{a}} \leftarrow$ 
+\acro{fault-posterior$\bigl(p(y_a), \pi\bigr)$}\\
 \ENDFOR
  \STATE $M_a \leftarrow$ 
-\acro{approx-marginals}$\bigl(z_a, \{\Prob{\vs^i_a}{\vy_{a}}\}\bigr)$\\
-\STATE {\bfseries return:} $\p{f\st}{\vy_{a}} \leftarrow$ \eqref{eq:pya}\\
+\acro{marginal-set}$\bigl(y_a, x_a,  \{\Prob{\vs^i_a}{y_{a}}\}\bigr)$\\
+\STATE {\bfseries return:} $\p{f\st}{y_{a}} \leftarrow$
+\acro{marginal-gp-predictions}\\
+\hfill$\bigl(x\st, y_a,  x_a, \{\Prob{\vs^i_a}{y_{a}}\}, M_a\bigr)$
 \FOR {$t = 2,\ldots$}
-\STATE $x_b \leftarrow x_t, z_b \leftarrow z_t, x\st \leftarrow x_{t+\delta}$\\
-\STATE $\p{\vy_b}{\vy_a} \leftarrow$ 
-\acro{predictions-gp}$(M_a,\vy_b, \pi)$\\
-\STATE $p(\vy_{a,b}) \leftarrow p(\vy_a)\p{\vy_b}{\vy_a}$
+\STATE $x_b \leftarrow x_t, y_b \leftarrow y_t, x\st \leftarrow x_{t+\delta}$\\
+\STATE $\p{y_b}{\vy_a} \leftarrow$ 
+\acro{marginal-gp-predictions}\\
+\hfill$\bigl(y_b, x_b, y_a, x_a, \{\Prob{\vs^i_a}{y_{a}}\}, M_a\bigr)$\\
+\STATE {\bfseries return:} $p(\vy_{a,b}) \leftarrow p(\vy_a)\p{\vy_b}{\vy_a}$
 \FOR {$j = 0,1$}
 \STATE {\bfseries return:} $\Prob{\vs^j_b}{\vy_{a,b}} \leftarrow$\\
 \hfill\acro{fault-posterior$\bigl(p(\vy_{a,b}), \pi\bigr)$}\\
 \ENDFOR
 \STATE $M_{a,b} \leftarrow$
-\acro{update-approx-marginals}\\
-\hfill$\bigl(M_a,z_b,\{\Prob{\vs^j_b}{\vy_{a,b}}\}\bigr)$\\
-\STATE {\bfseries return:} $\p{f\st}{\vy_{a,b}}\leftarrow$ \eqref{eq:pyab}\\
-\STATE {\bfseries return:} $p(\vy_{a} \leftarrow p(\vy_{a})$
-\STATE $x_a \leftarrow \{x_a,x_b\},\, z_a \leftarrow \{z_a,z_b\}$\\
+\acro{update-marginal-set}\\
+\hfill$\bigl(\vy_{a,b},\vx_{a,b},\{\Prob{\vs^j_b}{\vy_{a,b}}\},M_a\bigr)$\\
+\STATE {\bfseries return:} $\p{f\st}{\vy_{a,b}}\leftarrow$ 
+\acro{marginal-gp-predictions}\\
+\hfill$\bigl(x\st,\vy_{a,b}, \vx_{a,b},  \{\Prob{\vs^i_b}{\vy_{a,b}}\},M_{a,b}\bigr)$\\
+\STATE $p(\vy_{a}) \leftarrow p(\vy_{a,b})$
+\STATE $\vx_a \leftarrow [x_a,x_b],\, y_a \leftarrow [y_a,y_b]$\\
 \STATE $M_a \leftarrow M_{a,b}$\\
 \ENDFOR 
 \end{algorithmic}
@@ -756,26 +760,26 @@ optimising their likelihood on a large training set, giving a
 likelihood close to a delta function. This is not true of the
 hyperparameters $\sigma_n^2$ and $\sigma_f^2$, due to exactly the same
 problematic sums discussed earlier. Instead, we marginalise these
-hyperparameters online using Bayesian Monte Carlo \citep{BZMonteCarlo, OsborneIPSN}, %\citep[Chapter 7]{osbornebayesian},
+hyperparameters online using Bayesian Monte Carlo \cite{BZMonteCarlo,OsborneIPSN}, %\cite[Chapter 7]{osbornebayesian},
 taking a fixed set of samples in their values
 and using the hyperparameter likelihoods $p(\vy_{a,b})$ to construct
 weights over them. Essentially, we proceed as described above
 independently in parallel for each sample, and combine the predictions
 from each in a final weighted mixture for prediction. Note that we can
-use a similar procedure \citep{garnettosborne} to determine the full
+use a similar procedure \cite{garnettosborne} to determine the full
 posterior distributions of $\sigma_n^2$ and $\sigma_f^2$, if desired.  It
 would be desirable to use non-fixed samples, but, unfortunately, this
 would require reconstructing our full covariance matrix from
 scratch each time a sample is moved.
 
-The proposal above can be extended in several ways. First, we may wish
-to sum over more than one fault variance, which could be useful if
+Our proposal can be extended in several ways. First, we may wish
+to sum over more than one fault variance, useful if
 observations are prone to faultiness in more than one mode.  If, instead of summing over a small number of known variances, we
 wished to marginalise with respect to a density over noise variance,
 we can simply replace the sums over $i$ and $j$ with appropriate
 integrals. Obviously this will only be analytically possible if the
 posteriors for $\sigma_a^2$ take appropriate, simple forms.  In such a way our algorithm might tackle the general problem of
-heteroskedasticity.
+heteroscedasticity.
 
 
 Our proposed algorithm steps through our data one at a time, so that
@@ -789,7 +793,9 @@ noise contributions.
 
 We have so far not specified our prior for faultiness (as expressed by
 $p(\sigma_a^2)$ and $p(\sigma_b^2)$). Within this paper, we consider
-exclusively a time-independent probability of faultiness, but our framework does not necessarily require this to be so. In some contexts it might be useful to perform inference about the
+exclusively a time-independent probability $\pi$ of faultiness, but our framework does not necessarily require this to be so. 
+
+In some contexts it might be useful to perform inference about the
 fault contribution, rather than the signal of interest.  To do so, we merely switch the roles of the fault and non-fault
 contributions. Note that, using our full posteriors for faultiness, we
 can also trivially use Bayesian decision theory to make hard decisions
@@ -862,7 +868,7 @@ are often characterised by complex dynamics and will therefore provide
 a good indicator of our algorithm's performance on real-world
 tasks. We aim to improve upon the simple, human-supervised approaches
 to fault detection used in this field
-\citep{wagner2006guidelines}. For a quantitative assessment, we used two semi-synthetic datasets
+\cite{wagner2006guidelines}. For a quantitative assessment, we used two semi-synthetic datasets
 where a typical fault has been injected into clean sensor data. We
 then analyzed qualitative performance on two real data sets with actual
 faults. All measurements (other than for pH) are given in meters, with samples spaced in
@@ -874,7 +880,7 @@ increments of approximately 30 minutes. %The datasets are described below.
 %% function using a zero-mean Gaussian process prior distribution and the
 %% fault-bucket observation model.  The covariance function was chosen to
 %% be a Mat\'{e}rn covariance with parameter $\nu = \nicefrac{5}{2}$
-%% \citep{gpml}.  The hyperparameters of the non-fault model (the
+%% \cite{gpml}.  The hyperparameters of the non-fault model (the
 %% characteristic input and output scales and the noise variance
 %% $\sigma_n^2$) were learned offline via maximum-likelihood--II
 %% estimation on a disjoint segment of uncorrupted data.  The fault
@@ -903,7 +909,7 @@ flood. Both synthetic datasets represented sustained faults, of length 335 and 1
 Our first real dataset deals with pH measurements from the United States Geological Survey, a common indicator of water quality. In this series, a clear sensor fault can be seen
 in which the observations undergo a sudden, sustained decrease in value.
 %\subsubsection{Painting}
-The next (real) dataset contains a fault type called ``painting,'' which is
+The next (real) dataset contains a fault type called ``painting,'' 
 an error that occurs when ice builds on a sensor, obscuring some of the
 readings. It is characterised by frequent sensor spikes interlaced
 with the original, and still accurate, signal.
@@ -923,11 +929,45 @@ prediction.  A sliding window of size 100 was used to predict the
 value of the next observation.  Each dataset was recentered so that a
 zero prior mean function was appropriate, and the functions were all
 modeled using a Mat\'{e}rn covariance with parameter $\nu =
-\nicefrac{5}{2}$ \citep{gpml}.  The hyperparameters for this
+\nicefrac{5}{2}$ \cite{gpml}.  The hyperparameters for this
 covariance, including the normal observation noise variance
 $\sigma_n^2$, were learned using training data similar to but disjoint from the test datasets.  The unknown fault noise variance $\sigma_f^2$
-was marginalised using Bayesian Monte Carlo, with a parsimonious 7 samples used.  The prior probability of an observation being faulty was
+was marginalised using Bayesian Monte Carlo, with a parsimonious 7 samples used.  The prior probability of an observation being faulty, $\pi$, was
 set to a constant value of 1\% throughout.
+
+
+\begin{table*}[t]
+  \centering
+  \caption{Quantitative comparison of different algorithms on the
+    synthetic datasets.  For each dataset, we show the mean squared error
+    (\textsc{mse}), the log likelihood of the true data ($\log p(\bm{y}
+    \given \bm{x})$), and the true-positive and false-positive rates
+    of detection for faulty points (\textsc{tpr} and \textsc{fpr}),
+    respectively, with all methods permitted a `burn-in' period of 50 points. The best value for each set of results is highlighted in
+    bold.}\vspace{0.3cm}
+  \label{tbl:results}
+  \begin{tabular}{ccccccccc}
+    \toprule
+& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{``Flash-flood'' dataset}\\
+    \cmidrule(l){2-5} \cmidrule(l){6-9}
+    Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
+& \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
+\midrule
+    \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & \textbf{0.829} & {0.016} \\
+    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & {0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & 0.012 \\
+\scshape{epgp} & 0.879 & $-5.06 \times 10^3$ & 0.009 & 0.025 
+	       & 2.179 & $-2.14 \times 10^4$ & 0.000 & \textbf{0.000} \\ 
+    \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & \textbf{0.829} & 0.083 \\
+   \scshape{stgp} & 0.189 & $-604$ & 0.994 & 0.255 &
+		  0.249 & $-1.01\times 10^5$ & 0.787 & 0.140\\
+%    \scshape{argp} & 2.340 & $-1.93 \times 10^9$ & 0.6 & 0.4 & 1.097 & $-7.52\times 10^8$ & 0.178 & 0.822 \\
+    \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.045 & 0.262 \\
+%    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 & 0.360 & $-3.54 \times 10^4$ & 0.835 & 0.046 \\
+   \scshape{ekf} & 0.060 & $-1.26 \times 10^4$ & 0.551 & 0.258 & 0.613 & $-1.81\times 10^4$ & 0.169 & 0.768 \\
+   \scshape{skf} & 0.101 & $-1.04 \times 10^4$ & \textbf{0.997} & \textbf{0.000} & 0.162 & $-3.83\times 10^4$ & 0.805 & 0.004 \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
 
 We tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp}-based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
 \begin{equation}\label{eq:thresh}
@@ -941,20 +981,20 @@ where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\
 A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f^2 \p{\fault}{\vy} + \sigma_n^2 \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
 
 {\bf EPGP:}
-A \acro{gp} with our observation likelihood \eqref{eq:observation_likelihood} and the posterior determined by expectation propagation \citep{minka2001expectation}. Note that expectation propagation will not readily give us a posterior probability of faultiness; for the purposes of explicitly identifying faults, we use \eqref{eq:thresh}.
+A \acro{gp} with our observation likelihood \eqref{eq:observation_likelihood} and the posterior determined by expectation propagation \cite{minka2001expectation}. Note that expectation propagation will not readily give us a posterior probability of faultiness; for the purposes of explicitly identifying faults, we use \eqref{eq:thresh}.
 
 % \item[ TGP] 
 {\bf TGP:}
 A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f^2$.
 
 {\bf STGP:}
-A \acro{gp} with student-t likelihood with four degrees of freedom (which was found to optimise performance); the posterior was determined using a Laplace approximation as per \citet{vanhatalo2009gaussian}. To identify faults, \eqref{eq:thresh} was used.
+A \acro{gp} with student-t likelihood with four degrees of freedom (found to optimise performance); the posterior was determined using a Laplace approximation as per \citet{vanhatalo2009gaussian}. To identify faults, \eqref{eq:thresh} was used.
 
 %  \item[ ARGP] An auto-regressive Gaussian process (over the last 10 points), with a point identified as faulty using \eqref{eq:thresh}. If faulty, the value for the observation $y$ is taken as $\mean{y}{\vy}$ for future predictions.
 
 %\item[MLH] 
 {\bf MLH:} 
-The most likely heteroscedastic  \acro{gp} \citep{kersting2007most}. 
+The most likely heteroscedastic  \acro{gp} \cite{kersting2007most}. 
 %  \item[KF] A Kalman filter to perform one-step-lookahead predictions in an online fashion. Any datum identified as a fault by the threshold \eqref{eq:thresh} is simply ignored and discarded.
 
 {\bf EKF:}
@@ -962,7 +1002,11 @@ The most likely heteroscedastic  \acro{gp} \citep{kersting2007most}.
 An autoregressive neural net trained with the extended Kalman filter to capture nonstationarity. Again, \eqref{eq:thresh} was used to identify and discard faulty data.
 %\end{description}
 
-Note that for \acro{epgp}, \acro{stgp} and \acro{mlh}, we perform retrospective prediction (so that all data is available to make predictions about even the first predictant), as these methods are usually used. Clearly this allows these approaches an unfair predictive advantage relative to sequential methods. Note also that the multiple passes over the data effected by approximation schemes such as expectation propagation cannot be readily applied to the sequential problem without requiring a great deal of expensive computation. For $N$ observations, the computational cost of expectation propagation is $\mathcal{O}(N^3)$, with a large constant of proportionality, rendering it impractical for real-time problems. With efficient Cholesky factor updates, our scaling is $\mathcal{O}(N^2)$. For this reason, we did not consider even more demanding, non-sequential, expectation propagation approaches such as the twinned \acro{gp} \citep{naish2008robust}. Note also that these approaches do not provide posterior probabilities of faultiness, as our method is able to. 
+{\bf SKF:}
+%\item[EKF] 
+A switching Kalman filter \cite{murphy1998switching}, which switched between the non-faulty and faulty observation models in \eqref{eq:observation_likelihood}. The model was trained by solving the Yule-Walker equations; the best model order found was three. 
+
+Note that for \acro{epgp}, \acro{stgp} and \acro{mlh}, we perform retrospective prediction (so that all data is available to make predictions about even the first predictant), as these methods are usually used. Clearly this allows these approaches an unfair predictive advantage relative to sequential methods. Note also that the multiple passes over the data effected by approximation schemes such as expectation propagation cannot be readily applied to the sequential problem without requiring a great deal of expensive computation. For $N$ observations, the computational cost of expectation propagation is $\mathcal{O}(N^3)$, with a large constant of proportionality, rendering it impractical for real-time problems. With efficient Cholesky factor updates, our scaling is $\mathcal{O}(N^2)$. For this reason, we did not consider even more demanding, non-sequential, expectation propagation approaches such as the twinned \acro{gp} \cite{naish2008robust}. Note also that these approaches do not provide posterior probabilities of faultiness, as our method is able to. 
 
 % TGP: GP in which a pt was flagged as a fault if |pt - p4Mean| > thresh
 % XnGP: GP in which we exhaustively search over the faultiness of the last n pts, and approximate the noise variance of all previous points as having the value sigma_f p(fault|D) + sigma_n p(not fault|D), fixed at the time the point was observed (when data D was available). XnGP is more computationally expensive than FB (roughly 2^n times more)
@@ -983,39 +1027,10 @@ datasets.
 % The performance is remarkably better under mean-squared
 % predictive error as well as the likelihood of the actual data.  
 In addition to superior predictive performance, our
-detection rates for the faulty points are generally excellent. The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates of faultiness provide a human operator with an indication as to whether more sophisticated analysis is necessary.
+detection rates for the faulty points are generally excellent. Note that approaches that provided comparable fault-detection rates, like the \acro{tgp} and \acro{skf}, perform significantly poorer prediction.
+The results reveal that approximations \ref{app:single_gaussian}--\ref{app:affine} do not result in significant loss of performance relative to exhaustive search. Our na\"{i}ve approach to faults may, of course, suffer relative to better-informed models, but its probabilistic estimates of faultiness provide a human operator with an indication as to whether more sophisticated analysis is necessary.
 
-\begin{table*}
-  \centering
-  \caption{Quantitative comparison of different algorithms on the
-    synthetic datasets.  For each dataset, we show the mean squared error
-    (\textsc{mse}), the log likelihood of the true data ($\log p(\bm{y}
-    \given \bm{x})$), and the true-positive and false-positive rates
-    of detection for faulty points (\textsc{tpr} and \textsc{fpr}),
-    respectively, with all methods permitted a `burn-in' period of 50 points. The best value for each set of results is highlighted in
-    bold.}
-  \label{tbl:results}
-  \begin{tabular}{ccccccccc}
-    \toprule
-& \multicolumn{4}{c}{Bias dataset} & \multicolumn{4}{c}{``Flash-flood'' dataset}\\
-    \cmidrule(l){2-5} \cmidrule(l){6-9}
-    Method & \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} 
-& \scshape{mse} & $\log p(\bm{y}\given\bm{x})$ & \scshape{tpr} & \scshape{fpr} \\
-\midrule
-    \scshape{fb} & \textbf{0.024} & 334 & \textbf{0.997} & 0.031 & 0.069 & $-5.77\times 10^3$ & \textbf{0.829} & {0.016} \\
-    \scshape{xgp} & 0.037 & \textbf{439} & 0.982 & \textbf{0.022} & \textbf{0.042} & $\mathbf{-1.52 \times 10^3}$ & 0.805 & 0.012 \\
-\scshape{epgp} & 0.879 & $-5.06 \times 10^3$ & 0.009 & 0.025 
-	       & 2.179 & $-2.14 \times 10^4$ & 0.000 & \textbf{0.000} \\ 
-    \scshape{tgp} & 0.033 & 278 & \textbf{0.997} & 0.031 & 0.075 & $-8.29\times 10^3$ & \textbf{0.829} & 0.083 \\
-   \scshape{stgp} & 0.189 & $-604$ & 0.994 & 0.255 &
-		  0.249 & $-1.01\times 10^5$ & 0.787 & 0.140\\
-%    \scshape{argp} & 2.340 & $-1.93 \times 10^9$ & 0.6 & 0.4 & 1.097 & $-7.52\times 10^8$ & 0.178 & 0.822 \\
-    \scshape{mlh} & 0.940 & $-5.43\times 10^7$ & 0.065 & 0.031 & 2.369 & $-2.27\times 10^7$ & 0.045 & 0.262 \\
-%    \scshape{kf} & 0.894 & $-7.11 \times 10^5$ & 0.053 & 0.073 & 0.360 & $-3.54 \times 10^4$ & 0.835 & 0.046 \\
-   \scshape{ekf} & 0.060 & $-1.26 \times 10^4$ & 0.551 & 0.258 & 0.613 & $-1.81\times 10^4$ & 0.169 & 0.768 \\
-    \bottomrule
-  \end{tabular}
-\end{table*}
+
 
 \section{Conclusion}
 We have proposed a novel algorithm, the ``fault bucket,'' for managing
@@ -1027,9 +1042,9 @@ fast, effective prediction in the presence of unknown faults. Unlike most robust
 As to future work, addressing multivariate signals is of great interest. Unfortunately, this extension is not trivial and would itself require additional approximations. 
 
 %\small
-\setlength{\parskip}{0\baselineskip}
+\bibliographystyle{aaai}
 \bibliography{fault_bucket_icml_2011}
-%\bibliographystyle{plainnat}
+
 
 \end{document}
 
