@@ -114,26 +114,38 @@ correction of faults. Our method is deployed in the domain of water
 monitoring and management, where it is able to solve several fault
 detection, correction, and prediction problems. The method works well
 despite the fact that the data is plagued with numerous difficulties,
-including missing observations, multiple discontinuities,
-non-stationarity, nonlinearity and many unanticipated types of fault.
+including missing observations, multiple discontinuities, nonlinearity and many unanticipated types of fault.
 \end{quote}
 \end{abstract}
 
 \section{Introduction}
 
 
-Water sustainability is one of the most significant issues that humanity faces. Water is essential for life,
-but it also has a massive impact on the economy, affecting industries
-including agriculture, mining and power. Population and industrial growth, along with climate change, are beginning to stress
-water supplies. Between 1994 and 1999, 26\% of Canadian municipalities reported water shortages despite the fact that Canada
-contains 9\% of the world's renewable water supply \cite{atlas_canada}.
+Water sustainability is one of the most significant issues that
+humanity faces. The quality and availability of water
+directly affects the health and well-being of both human and natural
+environments. Water also has a massive economic impact, affecting
+industries
+such as agriculture, mining, power, forestry, and more. Population and
+industrial growth, along with climate change, are beginning to stress
+water supplies. Between 1994 and 1999, 26\% of Canadian municipalities
+reported water shortages despite the fact that Canada
+contains 7\% of the world's renewable freshwater supply \cite{atlas_canada}.
 
-One of the keys to effective water sustainability involves proper monitoring and analysis. Water is not distributed evenly in space
-and time, and being able to measure, predict, and respond to changes in the water supply will allow organizations to allocate supplies
-to where they are needed most. To this end, organizations such as Water Survey Canada (\acro{WSC}) and the United States Geological Survey (\acro{USGS})
-have set up around 11,000 monitoring stations across North America \cite{wagner2006guidelines}, many of them reporting telemetry data in real-time. Analyzing this
-ever-increasing amount of data by hand is difficult, costly, and time-consuming; there are many opportunities for Machine Learning
-to automate this process in order to significantly improve the efficiency and effectiveness of current water-management systems.
+One of the keys to effective water sustainability involves proper
+monitoring and analysis. Water is not distributed evenly in space
+and time, and being able to measure, predict, and respond to changes
+in the water supply will allow organizations to allocate supplies to
+where they are needed most. To this end, organizations such as Water
+Survey Canada (\acro{WSC}) and the United States Geological Survey
+(\acro{USGS})
+have set up around 11,000 monitoring stations across North America
+\cite{wagner2006guidelines}, many of them reporting telemetry data in
+real-time. Analyzing this ever-increasing amount of data by hand is
+difficult, costly, and time-consuming; there are many opportunities
+for Machine Learning
+to automate this process in order to significantly improve the
+efficiency and effectiveness of current water-management systems.
 
 In this paper, we attack the problem of
 fault detection, correction, and prediction in water monitoring
@@ -203,19 +215,18 @@ Our proposed method will rely on Gaussian processes (\acro{gp}s) due
 to their flexibility and widely demonstrated effectiveness. \acro{gp}s have been used previously for
 fault detection in \cite{Eciolaza2001}, but in a very different
 context, unsuitable for our problem. Previous work along similar lines
-has approached this problem by creating observation models that
+has approached this problem by creating models that
 specify
 the anticipated potential fault types \textit{a priori}
 \cite{garnettosborne}, but this is usually an unreasonable assumption
 in highly variable or poorly understood environments. 
-In our proposed  ``fault bucket'' approach, each point is considered
-to have been generated from either a nominal or generic faulty process; we do not require the specification of precise fault models. In
+In our proposed  ``fault bucket'' approach, each point is assumed generated from either a nominal or generic faulty process; we do not require the specification of precise fault models. In
 this way, our model can simultaneously identify anomalies and robustly
 make predictions in the presence of sensor faults. 
 % Since we cannot
 % make any strong assumptions about the nature of the faults, we model
 % the faulty process as a distribution with extremely high variance.
-The result is a fast, efficient method for data-stream prediction
+The result is an efficient method for data-stream prediction
 that can manage a
 wide range of faults without requiring significant
 domain-specific knowledge.
@@ -390,12 +401,10 @@ model and are hence included in $\theta$.
 
 Of course, {\it a priori}, we do not know whether an
 observation will be faulty.  Unfortunately, managing our uncertainty
-about the faultiness of all available observations is a
+about the faultiness of all observations is a
 challenging task. With $N$ observations, there are $2^N$
-possible assignments of faultiness; it is infeasible to consider them all.
-
-Our solution is founded upon approximation \ref{app:single_gaussian}. We approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian. This natural approach is similar to that taken in the related field of switching Kalman filters \cite{murphy1998switching}. We prefer this approximate marginalisation over
-faultiness to heuristics that would designate all
+possible assignments of faultiness; it is infeasible to consider them all. Our solution is founded upon approximation \ref{app:single_gaussian}. We approximately marginalise the faultiness of old observations, representing the mixture of different Gaussian predictions (each given by a different combination of faultiness) as a single Gaussian. This natural approach is similar to that taken in the related field of switching Kalman filters \cite{murphy1998switching}. We prefer this approximate marginalisation over
+faultiness to heuristics that would designate
 observations as either faulty or not---we acknowledge our
 uncertainty about faultiness. 
 
