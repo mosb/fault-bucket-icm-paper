@@ -16,7 +16,7 @@
  \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{algorithm}
-\usepackage{algorithmic}
+\usepackage{algpseudocode}
 \usepackage{url}
 
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
@@ -213,7 +213,7 @@ the presence of faults.
 
 Our proposed method will rely on Gaussian processes (\acro{gp}s) due
 to their flexibility and widely demonstrated effectiveness. \acro{gp}s have been used previously for
-fault detection in \cite{Eciolaza2001}, but in a very different
+fault detection in \citet{Eciolaza2001}, but in a very different
 context, unsuitable for our problem. Previous work along similar lines
 has approached this problem by creating models that
 specify
@@ -295,12 +295,12 @@ represent the value of the unknown true latent signal at that point.
 When the observation mechanism is not expected to experience faults,
 the usual noise model used is
 \begin{equation}\label{iidnoise}
- p(y \given f, x, \sigma_n^2)
+ p(y \given f, x, (\sigma^n)^2)
  \deq
- \cm{N}(y; f, \sigma_n^2),
+ \cm{N}(y; f, (\sigma^n)^2),
 \end{equation}
 which represents additive i.i.d.\space Gaussian observation noise with
-variance $\sigma_n^2$. Note that this model is inappropriate when
+variance $(\sigma^n)^2$. Note that this model is inappropriate when
 sensors can experience faults, which corrupt the relationship
 between $y$ and $f$.
 
@@ -348,7 +348,7 @@ V \inv
  K(\bm{x}, x\st; \theta),
 \end{align*}
 for $ V \deq 
- K(\bm{x}, \bm{x}; \theta) + \sigma_n^2 \bm{I}
+ K(\bm{x}, \bm{x}; \theta) + (\sigma^n)^2 \bm{I}
  $.
 
 We now make some definitions for the sake of readability. Henceforth,
@@ -382,21 +382,21 @@ but not identically distributed with separate variances for the
 non-fault and fault cases:
 \begin{align}
 \begin{split}\label{eq:observation_likelihood}
-  p(y \given f, x, \neg\fault, \sigma_n^2)
+  p(y \given f, x, \neg\fault, (\sigma^n)^2)
  &
  \deq
- \cm{N}(y; f, \sigma_n^2)
+ \cm{N}(y; f, (\sigma^n)^2)
  \\
- p(y \given f, x, \fault, \sigma_f^2)
+ p(y \given f, x, \fault, (\sigma^f)^2)
  &
  \deq
- \cm{N}(y; f, \sigma_f^2),
+ \cm{N}(y; f, (\sigma^f)^2),
 \end{split}
 \end{align}
 where $\fault \in \lbrace 0, 1 \rbrace$ is a binary indicator of
-whether the observation $y(x)$ was faulty and $\sigma_f > \sigma_n$ is
+whether the observation $y(x)$ was faulty and $\sigma^f > \sigma^n$ is
 the standard deviation around the mean of faulty measurements.  The
-values of both $\sigma_n$ and $\sigma_f$ form hyperparameters of our
+values of both $\sigma^n$ and $\sigma^f$ form hyperparameters of our
 model and are hence included in $\theta$.
 
 Of course, {\it a priori}, we do not know whether an
@@ -412,7 +412,7 @@ More formally, define $\vs$ to be the (unknown) vector of
 all noise variances at observations $\vy$. Because we have to sum over all possible values for these
 vectors, we will index the possible values of
 $\vs$ by $i$, each given by a different combination of
-faultiness over $\data$.
+faultiness over $\data$ (e.g. $\vs_t^0=\vs^n$ for $\neg\fault$ and $\vs_t^1=\vs^f$ for $\fault$).
 Given all data $\data$, we need to marginalise over predictions indexed by $i$, as per
 \begin{align}
 & \p{f\st}{\vy} \nonumber\\
@@ -479,7 +479,7 @@ and hence the hyperparameter posterior, $\ps{\vs_a}{\vy_{a}}$.
 This distribution specifies the probability of our observations
 $\data_a$ being faulty; for a single observation $\data_a$,
 $
-p\bigl(\fault(\data_a) \given \vy_{a}\bigr) = \Prob{\sigma_a = \sigma_f}{\vy_{a}}
+p\bigl(\fault(\data_a) \given \vy_{a}\bigr) = \Prob{\sigma_a = \sigma^f}{\vy_{a}}
 $.
 If we were to perform predictions for some $f\st$ using $\data_a$
 alone, we would need to evaluate
@@ -557,7 +557,7 @@ Before trying to manage these sums, we will determine $p(\vs_b \given \vy_{a,b})
 of the observations $\data_b$ being faulty. For example, if we have
 only a single observation $\data_b$, $
 p\bigl(\fault(\data_b) \given \vy_{a,b}\bigr) = \Prob{\sigma_b =
-  \sigma_f}{\vy_{a,b}} $. We define
+  \sigma^f}{\vy_{a,b}} $. We define
 \begin{align*}%labelled only for alg statement
 \amean{\vy_b}{\vy_a} \deq {} &
 K_{b,a} \tilde{V}_a^{-1} \vy_a %\label{eq;ameanba}
@@ -673,7 +673,7 @@ using the previously evaluated Cholesky factor of $\tilde{V}_{a}$.
 lower right hand element of $\tilde{V}_{a,b}$ defines the noise
 variance to be associated with observations $\data_b$. In effect, we represent
 each observation as having a known variance lying between
-$\sigma_n^2$ and $\sigma_f^2$. The more likely an observation's
+$(\sigma^n)^2$ and $(\sigma^f)^2$. The more likely an observation's
 faultiness, the closer its assigned variance will be to the (large)
 fault variance and the less relevant it will become for inference
 about the latent process. This approximate observation is then used
@@ -720,42 +720,43 @@ If we now receive further data $\data_c$, our existing data is simply treated as
 \begin{algorithm}[tb]
    \caption{Fault Bucket}
 \label{alg:fault_bucket}
-\begin{algorithmic}
-   \STATE {\bfseries input:} data $(\vx,\vy)$, lookahead $\delta$, fault prior $\pi$.
-\STATE $x_a \leftarrow x_1,\, y_a \leftarrow y_1,
+\begin{algorithmic}[1]
+\Statex{{\bfseries Input:} data $(\vx,\vy)$, lookahead $\delta$, fault prior $\pi$.}
+\Statex{{\bfseries Output:} 
+posterior probabilities of faultiness $\p{\sigma^1_t}{\vy_{1:t}}$, likelihoods $p(\vy_{1:t})$, predictions $\p{f_{t+\delta}}{\vy_{1:t}}$.}
+\State $x_a \leftarrow x_1,\, y_a \leftarrow y_1,
 \,x\st \leftarrow x_{1+\delta}$
-\\
-\STATE {\bfseries return:} $p(y_a) \leftarrow$\\
-\hfill\acro{marginal-gp-predictions}$(y_a, x_a, \pi)$\\
-\FOR {$i = 0,1$}
-\STATE {\bfseries return:} $\Prob{\vs^i_a}{y_{a}} \leftarrow$ 
-\acro{fault-posterior$\bigl(p(y_a), \pi\bigr)$}\\
-\ENDFOR
- \STATE $M_a \leftarrow$ 
-\acro{marginal-set}$\bigl(y_a, x_a,  \{\Prob{\vs^i_a}{y_{a}}\}\bigr)$\\
-\STATE {\bfseries return:} $\p{f\st}{y_{a}} \leftarrow$
+\State {\bfseries return:} $p(y_a) \leftarrow$\\
+\hfill\acro{marginal-gp-predictions}$(y_a, x_a, \pi)$
+\For{$i = 0,1$}
+\State {\bfseries return:} $\Prob{\vs^i_a}{y_{a}} \leftarrow$ 
+\acro{fault-posterior$\bigl(p(y_a), \pi\bigr)$}
+\EndFor
+ \State $M_a \leftarrow$ 
+\acro{marginal-set}$\bigl(y_a, x_a,  \{\Prob{\vs^i_a}{y_{a}}\}\bigr)$
+\State {\bfseries return:} $\p{f\st}{y_{a}} \leftarrow$
 \acro{marginal-gp-predictions}\\
 \hfill$\bigl(x\st, y_a,  x_a, \{\Prob{\vs^i_a}{y_{a}}\}, M_a\bigr)$
-\FOR {$t = 2,\ldots$}
-\STATE $x_b \leftarrow x_t, y_b \leftarrow y_t, x\st \leftarrow x_{t+\delta}$\\
-\STATE $\p{y_b}{\vy_a} \leftarrow$ 
+\For{$t = 2,\ldots$}
+\State $x_b \leftarrow x_t, y_b \leftarrow y_t, x\st \leftarrow x_{t+\delta}$
+\State $\p{y_b}{\vy_a} \leftarrow$ 
 \acro{marginal-gp-predictions}\\
-\hfill$\bigl(y_b, x_b, y_a, x_a, \{\Prob{\vs^i_a}{y_{a}}\}, M_a\bigr)$\\
-\STATE {\bfseries return:} $p(\vy_{a,b}) \leftarrow p(\vy_a)\p{\vy_b}{\vy_a}$
-\FOR {$j = 0,1$}
-\STATE {\bfseries return:} $\Prob{\vs^j_b}{\vy_{a,b}} \leftarrow$\\
-\hfill\acro{fault-posterior$\bigl(p(\vy_{a,b}), \pi\bigr)$}\\
-\ENDFOR
-\STATE $M_{a,b} \leftarrow$
+\hfill$\bigl(y_b, x_b, y_a, x_a, \pi, M_a\bigr)$
+\State {\bfseries return:} $p(\vy_{a,b}) \leftarrow p(\vy_a)\p{\vy_b}{\vy_a}$
+\For{$j = 0,1$}
+\State {\bfseries return:} $\Prob{\vs^j_b}{\vy_{a,b}} \leftarrow$
+\acro{fault-posterior}\\\hfill$\bigl(p(\vy_{a,b}), \pi\bigr)$
+\EndFor
+\State $M_{a,b} \leftarrow$
 \acro{update-marginal-set}\\
-\hfill$\bigl(\vy_{a,b},\vx_{a,b},\{\Prob{\vs^j_b}{\vy_{a,b}}\},M_a\bigr)$\\
-\STATE {\bfseries return:} $\p{f\st}{\vy_{a,b}}\leftarrow$ 
-\acro{marginal-gp-predictions}\\
-\hfill$\bigl(x\st,\vy_{a,b}, \vx_{a,b},  \{\Prob{\vs^i_b}{\vy_{a,b}}\},M_{a,b}\bigr)$\\
-\STATE $p(\vy_{a}) \leftarrow p(\vy_{a,b})$
-\STATE $\vx_a \leftarrow [x_a,x_b],\, y_a \leftarrow [y_a,y_b]$\\
-\STATE $M_a \leftarrow M_{a,b}$\\
-\ENDFOR 
+\hfill$\bigl(\vy_{a,b},\vx_{a,b},\{\Prob{\vs^j_b}{\vy_{a,b}}\},M_a\bigr)$
+\State {\bfseries return:} $\p{f\st}{\vy_{a,b}}\leftarrow$ 
+\acro{marginal-gp-}\\
+\hfill\acro{predictions}$\bigl(x\st,\vy_{a,b}, \vx_{a,b},  \{\Prob{\vs^j_b}{\vy_{a,b}}\},M_{a,b}\bigr)$
+\State $p(\vy_{a}) \leftarrow p(\vy_{a,b})$
+\State $\vx_a \leftarrow \vx_{a,b},\, y_a \leftarrow \vy_{a,b}$
+\State $M_a \leftarrow M_{a,b}$
+\EndFor 
 \end{algorithmic}
 \end{algorithm}
 
@@ -767,7 +768,7 @@ $\theta$. Unfortunately, analytically marginalising $\theta$ is
 impossible. Most of the hyperparameters of our model can be set by
 optimising their likelihood on a large training set, giving a
 likelihood close to a delta function. This is not true of the
-hyperparameters $\sigma_n^2$ and $\sigma_f^2$, due to exactly the same
+hyperparameters $\sigma^n$ and $\sigma^f$, due to exactly the same
 problematic sums discussed earlier. Instead, we marginalise these
 hyperparameters online using Bayesian Monte Carlo \cite{BZMonteCarlo,OsborneIPSN}, %\cite[Chapter 7]{osbornebayesian},
 taking a fixed set of samples in their values
@@ -776,7 +777,7 @@ weights over them. Essentially, we proceed as described above
 independently in parallel for each sample, and combine the predictions
 from each in a final weighted mixture for prediction. Note that we can
 use a similar procedure \cite{garnettosborne} to determine the full
-posterior distributions of $\sigma_n^2$ and $\sigma_f^2$, if desired.  It
+posterior distributions of $\sigma^n$ and $\sigma^f$, if desired.  It
 would be desirable to use non-fixed samples, but, unfortunately, this
 would require reconstructing our full covariance matrix from
 scratch each time a sample is moved.
@@ -787,7 +788,7 @@ observations are prone to faultiness in more than one mode.  If, instead of summ
 wished to marginalise with respect to a density over noise variance,
 we can simply replace the sums over $i$ and $j$ with appropriate
 integrals. Obviously this will only be analytically possible if the
-posteriors for $\sigma_a^2$ take appropriate, simple forms.  In such a way our algorithm might tackle the general problem of
+posteriors for $\sigma_a^i$ take appropriate, simple forms.  In such a way our algorithm might tackle the general problem of
 heteroscedasticity.
 
 
@@ -801,7 +802,7 @@ to improve results. It would also allow us to consider non-diagonal
 noise contributions.
 
 We have so far not specified our prior for faultiness (as expressed by
-$p(\sigma_a^2)$ and $p(\sigma_b^2)$). Within this paper, we consider
+$p(\sigma_a)$ and $p(\sigma_b)$). Within this paper, we consider
 exclusively a time-independent probability $\pi$ of faultiness, but our framework does not necessarily require this to be so. 
 
 In some contexts it might be useful to perform inference about the
@@ -811,7 +812,7 @@ can also trivially use Bayesian decision theory to make hard decisions
 as required.
 % To make a prediction about a potential faulty signal
 % at $x$, we follow exactly the same procedure as above, substituting
-% $\sigma_n^2$ for $\sigma_f^2$.
+% $(\sigma^n)^2$ for $(\sigma^f)^2$.
 
 % \begin{figure*}
 %   \centering
@@ -891,9 +892,9 @@ increments of approximately 30 minutes. %The datasets are described below.
 %% be a Mat\'{e}rn covariance with parameter $\nu = \nicefrac{5}{2}$
 %% \cite{gpml}.  The hyperparameters of the non-fault model (the
 %% characteristic input and output scales and the noise variance
-%% $\sigma_n^2$) were learned offline via maximum-likelihood--II
+%% $(\sigma^n)^2$) were learned offline via maximum-likelihood--II
 %% estimation on a disjoint segment of uncorrupted data.  The fault
-%% variance $\sigma_f^2$ was set to $0.2$ and the fault prior $\alpha$
+%% variance $(\sigma^f)^2$ was set to $0.2$ and the fault prior $\alpha$
 %% was chosen to be $10\%$.
 
 %% Figure \ref{faultpredictions} shows the results.  The predictions
@@ -939,8 +940,8 @@ value of the next observation.  Each dataset was recentered so that a
 zero prior mean function was appropriate, and the functions were all
 modeled using a Mat\'{e}rn covariance with parameter $\nu =
 \nicefrac{5}{2}$ \cite{gpml}.  The hyperparameters for this
-covariance, including the normal observation noise variance
-$\sigma_n^2$, were learned using training data similar to but disjoint from the test datasets.  The unknown fault noise variance $\sigma_f^2$
+covariance, including the normal observation noise
+$\sigma^n$, were learned using training data similar to but disjoint from the test datasets.  The unknown fault noise $\sigma^f$
 was marginalised using Bayesian Monte Carlo, with a parsimonious 7 samples used.  The prior probability of an observation being faulty, $\pi$, was
 set to a constant value of 1\% throughout.
 
@@ -980,21 +981,21 @@ set to a constant value of 1\% throughout.
 
 We tested against a number of different methods in order to establish the efficacy of the fault bucket algorithm. All \acro{gp}-based approaches used the same hyperparameters employed by our algorithm. The training set used to learn those hyperparameters was also supplied to other methods for their respective model learning phases. Several methods identify a new observation $y$ as a fault if
 \begin{equation}\label{eq:thresh}
- \bigl\lvert y-\mean{y}{\vy} \bigr\rvert > 3\sigma_T\,,
+ \bigl\lvert y-\mean{y}{\vy} \bigr\rvert > 3\sigma^T\,,
 \end{equation}
-where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\sigma_T$ is the noise standard deviation on the faultless training set. Of course, methods using \eqref{eq:thresh} or similar can not provide the posterior probability of a point's faultiness, as our algorithm can. Methods tested include:
+where $\mean{y}{\vy}$ is the method's \emph{a priori} prediction for $y$, and $\sigma^T$ is the noise standard deviation on the faultless training set. Of course, methods using \eqref{eq:thresh} or similar can not provide the posterior probability of a point's faultiness, as our algorithm can. Methods tested include:
 
 %\begin{description}
 %\item[ XGP] 
 {\bf XGP:}
-A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $\sigma_f^2 \p{\fault}{\vy} + \sigma_n^2 \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
+A  \acro{gp} in which we exhaustively search over the faultiness of the last 10 points, and approximate the noise variance of all previous points in the window as having the value $(\sigma^f)^2 \p{\fault}{\vy} + (\sigma^n)^2 \p{\neg\fault}{\vy}$, fixed at the time the point was observed (when data $\data$ was available). Clearly, this method is very much more computationally expensive than the fault bucket algorithm (roughly $2^9$ times more), but offers a useful way to quantify the influence of approximations \ref{app:single_gaussian}--\ref{app:affine}.
 
 {\bf EPGP:}
 A \acro{gp} with our observation likelihood \eqref{eq:observation_likelihood} and the posterior determined by expectation propagation \cite{minka2001expectation}. Note that expectation propagation will not readily give us a posterior probability of faultiness; for the purposes of explicitly identifying faults, we use \eqref{eq:thresh}.
 
 % \item[ TGP] 
 {\bf TGP:}
-A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $\sigma_f^2$.
+A \acro{gp} in which a point was flagged as a fault using \eqref{eq:thresh}; if faulty, a point was treated as having noise variance $(\sigma^f)^2$.
 
 {\bf STGP:}
 A \acro{gp} with student-t likelihood with four degrees of freedom (found to optimise performance); the posterior was determined using a Laplace approximation as per \citet{vanhatalo2009gaussian}. To identify faults, \eqref{eq:thresh} was used.
