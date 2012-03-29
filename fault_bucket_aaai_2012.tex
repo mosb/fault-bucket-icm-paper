@@ -86,20 +86,28 @@
 
 \title{Prediction and Fault Detection of Environmental Signals with Uncharacterised Faults}
 
-\author{ Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 \And Anonymous Author 4}
+\author{ Michael Osborne\\
+Engineering Science\\
+University of Oxford\\
+Oxford OX1 3PJ, UK\\
+\url{mosb@robots.ox.ac.uk}
+ \And Roman Garnett\\
+Robotics Institute\\
+Carnegie Mellon University\\
+Pittsburgh PA 15213, US\\
+\url{rgarnett@cs.cmu.edu}
+ \And Kevin Swersky\\
+Aquatic Informatics\\
+Suite 1100, 570 Granville St\\
+Vancouver, V6C 3P1, Canada\\
+\url{kswersky@cs.toronto.edu}
+ \And Nando de Freitas\\
+Computer Science \\
+University of British Columbia\\
+Vancouver, V6T 1Z4, Canada\\
+\url{nando@cs.ubc.ca}
+}
 
-% \aistatsauthor{ Michael Osborne \And Anonymous Author 2 \And Anonymous Author 3 }
-% 
-% \aistatsaddress{ Department of Engineering Science\\University of Oxford\\ \url{mosb@robots.ox.ac.uk} \And Unknown Institution 2 \And Unknown Institution 3 } ]
-
-% \icmlauthor{$^\ast$}{}
-% \icmlauthor{Roman Garnett$^\dagger$}{rgarnett@andrew.cmu.edu}
-% \icmlauthor{Kevin Swersky$^\ddagger$}{kevin@aquaticinformatics.com}
-% \icmlauthor{Nando de Freitas$^\text{\S}$}{nando@cs.ubc.ca}
-% \icmladdress{$^\ast$ \vspace{-10pt}}
-% \icmladdress{$^\dagger$Department of Computer Science, Carnegie Mellon University \vspace{-10pt}}
-% \icmladdress{$^\ddagger$Aquatic Informatics \vspace{-10pt}}
-% \icmladdress{$^\text{\S}$Department of Computer Science, University of British Columbia}
 \maketitle
 
 \begin{abstract}
@@ -1050,6 +1058,12 @@ faultiness of observations in a \acro{gp} framework, allowing for
 fast, effective prediction in the presence of unknown faults. Unlike most robust regression approaches (such as those using student-t likelihoods), we can also compute the posterior probability of faultiness. This capacity is crucial to its utility for the domain, serving as a means of alarming a human operator to the possible need for corrective action. 
 
 As to future work, addressing multivariate signals is of great interest. Unfortunately, this extension is not trivial and would itself require additional approximations. 
+
+\section*{Acknowledgement}
+All datasets have been provided by Aquatic Informatics. The data may
+be obtained by contacting Touraj Farahmand at
+\texttt{tourajf@aquaticinformatics.com}. \acro{m.a.o.} was funded by the \acro{orchid} project (\url{http://www.orchid.ac.uk/}).
+
 
 %\small
 \bibliographystyle{aaai}
